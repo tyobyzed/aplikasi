@@ -5,12 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi Pembelajaran Fisika - Guru Teguh Prasetyo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .card-hover { transition: all 0.3s ease; }
         .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .file-upload-area {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background-color: #f7fafc;
+        }
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #ebf4ff;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -168,8 +181,8 @@
                 </div>
             </div>
 
-            <!-- Detail Kelas (Hidden by default) -->
-            <div id="detail-kelas" class="hidden">
+            <!-- Daftar Materi (Hidden by default) -->
+            <div id="daftar-materi" class="hidden">
                 <div class="flex justify-between items-center mb-6">
                     <div class="flex items-center space-x-4">
                         <button id="back-to-kelas" class="text-blue-600 hover:text-blue-800">← Kembali</button>
@@ -189,15 +202,66 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Detail Materi (Hidden by default) -->
+            <div id="detail-materi" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="back-to-materi" class="text-blue-600 hover:text-blue-800">← Kembali</button>
+                        <h3 class="text-2xl font-bold" id="materi-title">Judul Materi</h3>
+                    </div>
+                    <button id="edit-materi-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 hidden">
+                        ✏️ Edit Materi
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-2">Deskripsi</h4>
+                        <p class="text-gray-600" id="materi-description">Deskripsi materi akan ditampilkan di sini</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h5 class="font-semibold mb-4">Download Materi</h5>
+                            <div class="space-y-3" id="materi-downloads">
+                                <!-- Link download akan dimuat di sini -->
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold mb-4">Informasi Materi</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Kelas:</span>
+                                    <span class="font-semibold" id="materi-kelas-info">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Terakhir update:</span>
+                                    <span class="font-semibold" id="materi-tanggal-info">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span class="font-semibold text-green-600">Aktif</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Siswa Page (Baru) -->
+        <!-- Siswa Page -->
         <div id="siswa-page" class="page-content hidden">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-800">Manajemen Siswa</h2>
-                <button id="tambah-siswa-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
-                    + Tambah Siswa
-                </button>
+                <div class="flex space-x-4">
+                    <button id="import-excel-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                        📥 Import Excel
+                    </button>
+                    <button id="tambah-siswa-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
+                        + Tambah Siswa
+                    </button>
+                </div>
             </div>
 
             <!-- Filter Kelas -->
@@ -522,6 +586,51 @@
         </div>
     </div>
 
+    <!-- Import Excel Modal -->
+    <div id="importExcelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6">Import Data Siswa dari Excel</h3>
+            
+            <div class="mb-6">
+                <h4 class="font-semibold mb-2">Format Excel yang Diperlukan:</h4>
+                <div class="bg-gray-50 rounded-lg p-4 text-sm">
+                    <p class="mb-2">File Excel harus memiliki kolom:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>NIS</strong> (Nomor Induk Siswa)</li>
+                        <li><strong>Nama</strong> (Nama Lengkap Siswa)</li>
+                        <li><strong>Kelas</strong> (Format: 10-1, 10-2, 11-1, dst)</li>
+                        <li><strong>Email</strong> (Opsional)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="file-upload-area rounded-lg p-8 text-center mb-6" id="fileUploadArea">
+                <div class="text-4xl mb-4">📁</div>
+                <p class="text-gray-600 mb-4">Drag & drop file Excel di sini atau klik untuk browse</p>
+                <input type="file" id="excelFile" accept=".xlsx,.xls" class="hidden">
+                <button type="button" id="browseBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Pilih File
+                </button>
+            </div>
+
+            <div id="fileInfo" class="hidden mb-6">
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <p class="font-semibold text-blue-800">File yang dipilih:</p>
+                    <p class="text-blue-600" id="fileName"></p>
+                </div>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="button" id="processExcelBtn" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 font-semibold disabled:bg-gray-400" disabled>
+                    📥 Proses Import
+                </button>
+                <button type="button" id="closeImportModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Tambah Siswa Modal -->
     <div id="tambahSiswaModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
@@ -563,28 +672,44 @@
         </div>
     </div>
 
-    <!-- Upload Modal -->
-    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold mb-6" id="upload-title">Upload File</h3>
-            <form id="uploadForm">
+    <!-- Upload Materi Modal -->
+    <div id="uploadMateriModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6">Upload Materi Pembelajaran</h3>
+            <form id="uploadMateriForm">
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul</label>
-                    <input type="text" id="upload-judul" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan judul...">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Materi</label>
+                    <input type="text" id="materi-judul-baru" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan judul materi" required>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                    <textarea id="upload-deskripsi" rows="3" class="w-full border rounded-lg px-4 py-2" placeholder="Deskripsi singkat..."></textarea>
+                    <textarea id="materi-deskripsi-baru" rows="3" class="w-full border rounded-lg px-4 py-2" placeholder="Deskripsi materi pembelajaran"></textarea>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">File/Link</label>
-                    <input type="text" id="upload-link" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan link atau nama file...">
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link PPT</label>
+                        <input type="url" id="materi-ppt-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Video</label>
+                        <input type="url" id="materi-video-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Latihan</label>
+                        <input type="url" id="materi-latihan-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Modul</label>
+                        <input type="url" id="materi-modul-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
                 </div>
+                
                 <div class="flex space-x-4">
                     <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold">
-                        Upload
+                        💾 Upload Materi
                     </button>
-                    <button type="button" id="closeUploadModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                    <button type="button" id="closeUploadMateriModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
                         Batal
                     </button>
                 </div>
@@ -598,21 +723,99 @@
         let currentPage = 'home';
         let currentKelas = null;
         let currentSiswaFilter = 'all';
+        let currentMateri = null;
 
         // Sample data
         const materiData = {
             '10': [
-                { id: 1, judul: 'Kinematika Gerak Lurus', deskripsi: 'Konsep dasar gerak lurus beraturan dan berubah beraturan', jenis: 'PPT', tanggal: '2024-11-15', link: '#' },
-                { id: 2, judul: 'Hukum Newton', deskripsi: 'Tiga hukum Newton tentang gerak', jenis: 'Video', tanggal: '2024-11-14', link: '#' },
-                { id: 3, judul: 'Latihan Soal Dinamika', deskripsi: 'Kumpulan soal latihan tentang gaya dan gerak', jenis: 'Latihan', tanggal: '2024-11-13', link: '#' }
+                { 
+                    id: 1, 
+                    judul: 'Kinematika Gerak Lurus', 
+                    deskripsi: 'Konsep dasar gerak lurus beraturan dan berubah beraturan', 
+                    tanggal: '2024-11-15',
+                    links: {
+                        ppt: 'https://example.com/ppt/kinematika.pptx',
+                        video: 'https://example.com/video/kinematika.mp4',
+                        latihan: 'https://example.com/latihan/kinematika.pdf',
+                        modul: 'https://example.com/modul/kinematika.pdf'
+                    }
+                },
+                { 
+                    id: 2, 
+                    judul: 'Hukum Newton', 
+                    deskripsi: 'Tiga hukum Newton tentang gerak', 
+                    tanggal: '2024-11-14',
+                    links: {
+                        ppt: 'https://example.com/ppt/newton.pptx',
+                        video: 'https://example.com/video/newton.mp4',
+                        latihan: 'https://example.com/latihan/newton.pdf',
+                        modul: 'https://example.com/modul/newton.pdf'
+                    }
+                },
+                { 
+                    id: 3, 
+                    judul: 'Latihan Soal Dinamika', 
+                    deskripsi: 'Kumpulan soal latihan tentang gaya dan gerak', 
+                    tanggal: '2024-11-13',
+                    links: {
+                        ppt: '',
+                        video: 'https://example.com/video/dinamika.mp4',
+                        latihan: 'https://example.com/latihan/dinamika.pdf',
+                        modul: 'https://example.com/modul/dinamika.pdf'
+                    }
+                }
             ],
             '11': [
-                { id: 4, judul: 'Listrik Statis', deskripsi: 'Konsep muatan listrik dan hukum Coulomb', jenis: 'PPT', tanggal: '2024-11-12', link: '#' },
-                { id: 5, judul: 'Rangkaian Listrik', deskripsi: 'Analisis rangkaian seri dan paralel', jenis: 'Video', tanggal: '2024-11-11', link: '#' }
+                { 
+                    id: 4, 
+                    judul: 'Listrik Statis', 
+                    deskripsi: 'Konsep muatan listrik dan hukum Coulomb', 
+                    tanggal: '2024-11-12',
+                    links: {
+                        ppt: 'https://example.com/ppt/listrik-statis.pptx',
+                        video: 'https://example.com/video/listrik-statis.mp4',
+                        latihan: 'https://example.com/latihan/listrik-statis.pdf',
+                        modul: 'https://example.com/modul/listrik-statis.pdf'
+                    }
+                },
+                { 
+                    id: 5, 
+                    judul: 'Rangkaian Listrik', 
+                    deskripsi: 'Analisis rangkaian seri dan paralel', 
+                    tanggal: '2024-11-11',
+                    links: {
+                        ppt: 'https://example.com/ppt/rangkaian.pptx',
+                        video: 'https://example.com/video/rangkaian.mp4',
+                        latihan: 'https://example.com/latihan/rangkaian.pdf',
+                        modul: 'https://example.com/modul/rangkaian.pdf'
+                    }
+                }
             ],
             '12': [
-                { id: 6, judul: 'Gelombang Elektromagnetik', deskripsi: 'Sifat dan karakteristik gelombang EM', jenis: 'PPT', tanggal: '2024-11-10', link: '#' },
-                { id: 7, judul: 'Fisika Kuantum', deskripsi: 'Pengenalan konsep dasar fisika kuantum', jenis: 'Video', tanggal: '2024-11-09', link: '#' }
+                { 
+                    id: 6, 
+                    judul: 'Gelombang Elektromagnetik', 
+                    deskripsi: 'Sifat dan karakteristik gelombang EM', 
+                    tanggal: '2024-11-10',
+                    links: {
+                        ppt: 'https://example.com/ppt/gelombang-em.pptx',
+                        video: 'https://example.com/video/gelombang-em.mp4',
+                        latihan: 'https://example.com/latihan/gelombang-em.pdf',
+                        modul: 'https://example.com/modul/gelombang-em.pdf'
+                    }
+                },
+                { 
+                    id: 7, 
+                    judul: 'Fisika Kuantum', 
+                    deskripsi: 'Pengenalan konsep dasar fisika kuantum', 
+                    tanggal: '2024-11-09',
+                    links: {
+                        ppt: 'https://example.com/ppt/kuantum.pptx',
+                        video: 'https://example.com/video/kuantum.mp4',
+                        latihan: 'https://example.com/latihan/kuantum.pdf',
+                        modul: 'https://example.com/modul/kuantum.pdf'
+                    }
+                }
             ]
         };
 
@@ -686,7 +889,7 @@
             const isGuru = currentUser && currentUser.role === 'guru';
             
             // Show/hide guru-only buttons
-            document.querySelectorAll('#tambah-materi-btn, #hadirkan-semua-btn, #upload-nilai-btn, #tambah-jurnal-btn, #tambah-siswa-btn').forEach(btn => {
+            document.querySelectorAll('#tambah-materi-btn, #hadirkan-semua-btn, #upload-nilai-btn, #tambah-jurnal-btn, #tambah-siswa-btn, #import-excel-btn, #edit-materi-btn').forEach(btn => {
                 btn.classList.toggle('hidden', !isGuru);
             });
             
@@ -708,12 +911,20 @@
         }
 
         function loadKelasContent() {
-            const detailKelas = document.getElementById('detail-kelas');
-            if (currentKelas) {
-                detailKelas.classList.remove('hidden');
+            const daftarMateri = document.getElementById('daftar-materi');
+            const detailMateri = document.getElementById('detail-materi');
+            
+            if (currentKelas && !currentMateri) {
+                daftarMateri.classList.remove('hidden');
+                detailMateri.classList.add('hidden');
                 loadMateriList();
+            } else if (currentMateri) {
+                daftarMateri.classList.add('hidden');
+                detailMateri.classList.remove('hidden');
+                loadMateriDetail();
             } else {
-                detailKelas.classList.add('hidden');
+                daftarMateri.classList.add('hidden');
+                detailMateri.classList.add('hidden');
             }
         }
 
@@ -722,30 +933,78 @@
             const materi = materiData[currentKelas] || [];
             
             materiList.innerHTML = materi.map(item => `
-                <div class="p-6 hover:bg-gray-50">
+                <div class="p-6 hover:bg-gray-50 cursor-pointer" onclick="showMateriDetail(${item.id})">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-2xl">${getJenisIcon(item.jenis)}</span>
+                                <span class="text-2xl">📚</span>
                                 <h5 class="font-semibold text-lg">${item.judul}</h5>
-                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${item.jenis}</span>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Materi</span>
                             </div>
                             <p class="text-gray-600 mb-2">${item.deskripsi}</p>
                             <p class="text-sm text-gray-500">Diupload: ${formatTanggal(item.tanggal)}</p>
                         </div>
-                        <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800 px-3 py-1 rounded border border-blue-600 hover:bg-blue-50">
-                                📥 Download
-                            </button>
-                            ${currentUser && currentUser.role === 'guru' ? `
-                                <button class="text-red-600 hover:text-red-800 px-3 py-1 rounded border border-red-600 hover:bg-red-50" onclick="hapusMateri(${item.id})">
-                                    🗑️ Hapus
-                                </button>
-                            ` : ''}
+                        <div class="flex items-center space-x-2">
+                            <span class="text-blue-600">→</span>
                         </div>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function showMateriDetail(materiId) {
+            currentMateri = materiId;
+            loadKelasContent();
+        }
+
+        function loadMateriDetail() {
+            const materi = materiData[currentKelas].find(m => m.id === currentMateri);
+            if (!materi) return;
+            
+            document.getElementById('materi-title').textContent = materi.judul;
+            document.getElementById('materi-description').textContent = materi.deskripsi;
+            document.getElementById('materi-kelas-info').textContent = `Kelas ${currentKelas}`;
+            document.getElementById('materi-tanggal-info').textContent = formatTanggal(materi.tanggal);
+            
+            const materiDownloads = document.getElementById('materi-downloads');
+            materiDownloads.innerHTML = `
+                ${materi.links.ppt ? `
+                    <a href="${materi.links.ppt}" target="_blank" class="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-red-600">📄</span>
+                            <span class="font-medium">Presentasi (PPT)</span>
+                        </div>
+                        <span class="text-red-600">📥</span>
+                    </a>
+                ` : ''}
+                ${materi.links.video ? `
+                    <a href="${materi.links.video}" target="_blank" class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-blue-600">🎥</span>
+                            <span class="font-medium">Video Pembelajaran</span>
+                        </div>
+                        <span class="text-blue-600">📥</span>
+                    </a>
+                ` : ''}
+                ${materi.links.latihan ? `
+                    <a href="${materi.links.latihan}" target="_blank" class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-600">✏️</span>
+                            <span class="font-medium">Latihan Soal</span>
+                        </div>
+                        <span class="text-green-600">📥</span>
+                    </a>
+                ` : ''}
+                ${materi.links.modul ? `
+                    <a href="${materi.links.modul}" target="_blank" class="flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-purple-600">📖</span>
+                            <span class="font-medium">Modul Pembelajaran</span>
+                        </div>
+                        <span class="text-purple-600">📥</span>
+                    </a>
+                ` : ''}
+            `;
         }
 
         function loadSiswaContent() {
@@ -844,7 +1103,6 @@
         }
 
         function loadKehadiranSiswa() {
-            // Simulasi data kehadiran siswa yang login
             const persentaseHadir = document.getElementById('persentase-hadir');
             persentaseHadir.textContent = '95%';
         }
@@ -898,7 +1156,6 @@
 
         function loadNilaiSiswa() {
             const nilaiSiswaList = document.getElementById('nilai-siswa-list');
-            // Simulasi nilai untuk siswa yang login
             const nilaiSiswa = [
                 { jenis: 'Ujian Harian 1', nilai: 85, tanggal: '2024-11-10' },
                 { jenis: 'Tugas Proyek', nilai: 92, tanggal: '2024-11-08' },
@@ -954,16 +1211,76 @@
             `).join('');
         }
 
-        // Helper functions
-        function getJenisIcon(jenis) {
-            switch(jenis) {
-                case 'PPT': return '📄';
-                case 'Video': return '🎥';
-                case 'Latihan': return '✏️';
-                default: return '📎';
-            }
+        // Excel processing functions
+        function processExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    let successCount = 0;
+                    let errorCount = 0;
+                    const errors = [];
+                    
+                    jsonData.forEach((row, index) => {
+                        if (row.NIS && row.Nama && row.Kelas) {
+                            // Check if NIS already exists
+                            if (siswaData.find(s => s.nis === row.NIS.toString())) {
+                                errors.push(`Baris ${index + 2}: NIS ${row.NIS} sudah terdaftar`);
+                                errorCount++;
+                                return;
+                            }
+                            
+                            const newSiswa = {
+                                id: Date.now() + index,
+                                nis: row.NIS.toString(),
+                                nama: row.Nama,
+                                kelas: row.Kelas,
+                                email: row.Email || '',
+                                hadir: false
+                            };
+                            
+                            siswaData.push(newSiswa);
+                            successCount++;
+                        } else {
+                            errors.push(`Baris ${index + 2}: Data tidak lengkap (NIS, Nama, dan Kelas wajib diisi)`);
+                            errorCount++;
+                        }
+                    });
+                    
+                    // Show result
+                    let message = `Import selesai!\n\n`;
+                    message += `✅ Berhasil: ${successCount} siswa\n`;
+                    message += `❌ Gagal: ${errorCount} siswa\n\n`;
+                    
+                    if (errors.length > 0) {
+                        message += `Detail Error:\n${errors.slice(0, 5).join('\n')}`;
+                        if (errors.length > 5) {
+                            message += `\n... dan ${errors.length - 5} error lainnya`;
+                        }
+                    }
+                    
+                    alert(message);
+                    
+                    // Refresh table
+                    loadSiswaTable();
+                    
+                    // Close modal
+                    document.getElementById('importExcelModal').classList.add('hidden');
+                    document.getElementById('fileInfo').classList.add('hidden');
+                    document.getElementById('processExcelBtn').disabled = true;
+                    
+                } catch (error) {
+                    alert('Error processing file: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
+        // Helper functions
         function formatTanggal(tanggal) {
             return new Date(tanggal).toLocaleDateString('id-ID', {
                 year: 'numeric',
@@ -974,7 +1291,7 @@
 
         function updateRingkasanKehadiran(siswaList) {
             const totalHadir = siswaList.filter(s => s.hadir).length;
-            const totalSakit = 0; // Simplified for demo
+            const totalSakit = 0;
             const totalIzin = 0;
             const totalAlpha = siswaList.length - totalHadir;
 
@@ -990,16 +1307,6 @@
             if (siswa) {
                 siswa.hadir = status === 'hadir';
                 loadKehadiranContent();
-            }
-        }
-
-        function hapusMateri(materiId) {
-            if (confirm('Apakah Anda yakin ingin menghapus materi ini?')) {
-                // Remove from data
-                Object.keys(materiData).forEach(kelas => {
-                    materiData[kelas] = materiData[kelas].filter(m => m.id !== materiId);
-                });
-                loadMateriList();
             }
         }
 
@@ -1055,21 +1362,26 @@
             document.querySelectorAll('.kelas-card').forEach(card => {
                 card.addEventListener('click', () => {
                     currentKelas = card.dataset.kelas;
+                    currentMateri = null;
                     document.getElementById('kelas-title').textContent = `Kelas ${currentKelas} - Fisika`;
                     loadKelasContent();
                 });
             });
 
-            // Back to kelas button
+            // Back buttons
             document.getElementById('back-to-kelas').addEventListener('click', () => {
-                currentKelas = null;
+                currentMateri = null;
+                loadKelasContent();
+            });
+
+            document.getElementById('back-to-materi').addEventListener('click', () => {
+                currentMateri = null;
                 loadKelasContent();
             });
 
             // Kelas filter buttons
             document.querySelectorAll('.kelas-filter-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // Update button styles
                     document.querySelectorAll('.kelas-filter-btn').forEach(b => {
                         b.classList.remove('bg-blue-600', 'text-white');
                         b.classList.add('bg-gray-200', 'text-gray-700');
@@ -1077,7 +1389,6 @@
                     btn.classList.remove('bg-gray-200', 'text-gray-700');
                     btn.classList.add('bg-blue-600', 'text-white');
                     
-                    // Update filter
                     currentSiswaFilter = btn.dataset.kelas;
                     loadSiswaTable();
                 });
@@ -1091,6 +1402,68 @@
             document.getElementById('closeModal').addEventListener('click', () => {
                 document.getElementById('loginModal').classList.add('hidden');
             });
+
+            // Import Excel modal
+            document.getElementById('import-excel-btn').addEventListener('click', () => {
+                document.getElementById('importExcelModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeImportModal').addEventListener('click', () => {
+                document.getElementById('importExcelModal').classList.add('hidden');
+            });
+
+            // File upload handling
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const excelFile = document.getElementById('excelFile');
+            const browseBtn = document.getElementById('browseBtn');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const processExcelBtn = document.getElementById('processExcelBtn');
+
+            browseBtn.addEventListener('click', () => {
+                excelFile.click();
+            });
+
+            fileUploadArea.addEventListener('click', () => {
+                excelFile.click();
+            });
+
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            excelFile.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleFileSelect(file) {
+                if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                    file.type === 'application/vnd.ms-excel') {
+                    fileName.textContent = file.name;
+                    fileInfo.classList.remove('hidden');
+                    processExcelBtn.disabled = false;
+                    processExcelBtn.onclick = () => processExcelFile(file);
+                } else {
+                    alert('Harap pilih file Excel (.xlsx atau .xls)');
+                }
+            }
 
             // Tambah siswa modal
             document.getElementById('tambah-siswa-btn').addEventListener('click', () => {
@@ -1110,7 +1483,6 @@
                 const kelas = document.getElementById('siswa-kelas-baru').value;
                 const email = document.getElementById('siswa-email-baru').value;
                 
-                // Check if NIS already exists
                 if (siswaData.find(s => s.nis === nis)) {
                     alert('NIS sudah terdaftar!');
                     return;
@@ -1131,6 +1503,51 @@
                 document.getElementById('tambahSiswaForm').reset();
                 loadSiswaTable();
                 alert('Siswa berhasil ditambahkan!');
+            });
+
+            // Tambah materi button
+            document.getElementById('tambah-materi-btn').addEventListener('click', () => {
+                document.getElementById('uploadMateriModal').classList.remove('hidden');
+            });
+
+            // Upload materi modal
+            document.getElementById('closeUploadMateriModal').addEventListener('click', () => {
+                document.getElementById('uploadMateriModal').classList.add('hidden');
+            });
+
+            // Upload materi form
+            document.getElementById('uploadMateriForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const judul = document.getElementById('materi-judul-baru').value;
+                const deskripsi = document.getElementById('materi-deskripsi-baru').value;
+                const ppt = document.getElementById('materi-ppt-baru').value;
+                const video = document.getElementById('materi-video-baru').value;
+                const latihan = document.getElementById('materi-latihan-baru').value;
+                const modul = document.getElementById('materi-modul-baru').value;
+                
+                const newMateri = {
+                    id: Date.now(),
+                    judul: judul,
+                    deskripsi: deskripsi,
+                    tanggal: new Date().toISOString().split('T')[0],
+                    links: {
+                        ppt: ppt,
+                        video: video,
+                        latihan: latihan,
+                        modul: modul
+                    }
+                };
+                
+                if (!materiData[currentKelas]) {
+                    materiData[currentKelas] = [];
+                }
+                materiData[currentKelas].unshift(newMateri);
+                
+                document.getElementById('uploadMateriModal').classList.add('hidden');
+                document.getElementById('uploadMateriForm').reset();
+                loadMateriList();
+                alert('Materi berhasil ditambahkan!');
             });
 
             // Login tabs
@@ -1199,49 +1616,9 @@
                 alert('Semua siswa telah dihadirkan!');
             });
 
-            // Tambah materi button
-            document.getElementById('tambah-materi-btn').addEventListener('click', () => {
-                document.getElementById('upload-title').textContent = 'Tambah Materi';
-                document.getElementById('uploadModal').classList.remove('hidden');
-            });
-
             // Upload nilai button
             document.getElementById('upload-nilai-btn').addEventListener('click', () => {
                 alert('Fitur upload nilai akan membuka dialog untuk upload file Excel/CSV atau input manual.');
-            });
-
-            // Upload modal
-            document.getElementById('closeUploadModal').addEventListener('click', () => {
-                document.getElementById('uploadModal').classList.add('hidden');
-            });
-
-            document.getElementById('uploadForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                const judul = document.getElementById('upload-judul').value;
-                const deskripsi = document.getElementById('upload-deskripsi').value;
-                const link = document.getElementById('upload-link').value;
-                
-                if (judul && deskripsi && link) {
-                    const newMateri = {
-                        id: Date.now(),
-                        judul: judul,
-                        deskripsi: deskripsi,
-                        jenis: 'PPT', // Default
-                        tanggal: new Date().toISOString().split('T')[0],
-                        link: link
-                    };
-                    
-                    if (!materiData[currentKelas]) {
-                        materiData[currentKelas] = [];
-                    }
-                    materiData[currentKelas].unshift(newMateri);
-                    
-                    document.getElementById('uploadModal').classList.add('hidden');
-                    document.getElementById('uploadForm').reset();
-                    loadMateriList();
-                    alert('Materi berhasil ditambahkan!');
-                }
             });
 
             // Jurnal form
