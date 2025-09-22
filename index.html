@@ -58,6 +58,13 @@
             font-size: 12px;
             white-space: nowrap;
         }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -147,21 +154,66 @@
             <div class="bg-white rounded-xl p-8 shadow-lg">
                 <h3 class="text-2xl font-bold mb-6">Statistik Pembelajaran</h3>
                 <div class="grid md:grid-cols-4 gap-6">
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-600 mb-2" id="stat-total-kelas">6</div>
-                        <div class="text-gray-600">Total Kelas</div>
+                    <div class="stat-card bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-blue-600 mb-2" id="stat-total-kelas">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Total Kelas</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-kelas-detail">Memuat...</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-green-600 mb-2" id="stat-total-materi">0</div>
-                        <div class="text-gray-600">Materi Tersedia</div>
+                    <div class="stat-card bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-green-600 mb-2" id="stat-total-materi">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Materi Tersedia</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-materi-detail">Memuat...</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-purple-600 mb-2" id="stat-total-siswa">0</div>
-                        <div class="text-gray-600">Total Siswa</div>
+                    <div class="stat-card bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2" id="stat-total-siswa">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Total Siswa</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-siswa-detail">Memuat...</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-yellow-600 mb-2" id="stat-kehadiran-rata">0%</div>
-                        <div class="text-gray-600">Kehadiran Rata-rata</div>
+                    <div class="stat-card bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-yellow-600 mb-2" id="stat-kehadiran-rata">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Kehadiran Rata-rata</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-kehadiran-detail">Memuat...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Statistics -->
+            <div class="grid md:grid-cols-3 gap-6 mt-8">
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold">Aktivitas Terkini</h4>
+                        <span class="text-2xl">📈</span>
+                    </div>
+                    <div id="recent-activity" class="space-y-3">
+                        <!-- Recent activity will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold">Distribusi Kelas</h4>
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <div id="kelas-distribution" class="space-y-3">
+                        <!-- Class distribution will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold">Status Hari Ini</h4>
+                        <span class="text-2xl">📅</span>
+                    </div>
+                    <div id="today-status" class="space-y-3">
+                        <!-- Today's status will be loaded here -->
                     </div>
                 </div>
             </div>
@@ -875,22 +927,16 @@
         async function loadHomeContent() {
             showLoading();
             try {
-                // Load statistics
-                const { data: siswaData, error: siswaError } = await supabaseClient
-                    .from('siswa')
-                    .select('*', { count: 'exact', head: true });
-
-                const { data: materiData, error: materiError } = await supabaseClient
-                    .from('materi')
-                    .select('*', { count: 'exact', head: true });
-
-                if (!siswaError && !materiError) {
-                    document.getElementById('stat-total-siswa').textContent = siswaData.length || 0;
-                    document.getElementById('stat-total-materi').textContent = materiData.length || 0;
-                    
-                    // Calculate real attendance percentage
-                    await calculateAttendancePercentage();
-                }
+                // Load all statistics
+                await Promise.all([
+                    loadTotalKelas(),
+                    loadTotalMateri(),
+                    loadTotalSiswa(),
+                    loadAttendancePercentage(),
+                    loadRecentActivity(),
+                    loadKelasDistribution(),
+                    loadTodayStatus()
+                ]);
             } catch (error) {
                 console.error('Error loading home content:', error);
             } finally {
@@ -898,7 +944,66 @@
             }
         }
 
-        async function calculateAttendancePercentage() {
+        async function loadTotalKelas() {
+            try {
+                // Get unique classes from students
+                const { data: siswa, error } = await supabaseClient
+                    .from('siswa')
+                    .select('kelas');
+                
+                if (error) throw error;
+                
+                // Get unique classes
+                const kelasSet = new Set();
+                siswa.forEach(item => {
+                    if (item.kelas) kelasSet.add(item.kelas);
+                });
+                
+                const totalKelas = kelasSet.size;
+                document.getElementById('stat-total-kelas').textContent = totalKelas;
+                document.getElementById('stat-kelas-detail').textContent = `${totalKelas} kelas aktif`;
+            } catch (error) {
+                console.error('Error loading total kelas:', error);
+                document.getElementById('stat-total-kelas').textContent = '0';
+                document.getElementById('stat-kelas-detail').textContent = 'Error';
+            }
+        }
+
+        async function loadTotalMateri() {
+            try {
+                const { data: materi, error } = await supabaseClient
+                    .from('materi')
+                    .select('*', { count: 'exact', head: true });
+
+                if (error) throw error;
+                
+                document.getElementById('stat-total-materi').textContent = materi.length || 0;
+                document.getElementById('stat-materi-detail').textContent = `${materi.length || 0} materi tersedia`;
+            } catch (error) {
+                console.error('Error loading total materi:', error);
+                document.getElementById('stat-total-materi').textContent = '0';
+                document.getElementById('stat-materi-detail').textContent = 'Error';
+            }
+        }
+
+        async function loadTotalSiswa() {
+            try {
+                const { data: siswa, error } = await supabaseClient
+                    .from('siswa')
+                    .select('*', { count: 'exact', head: true });
+
+                if (error) throw error;
+                
+                document.getElementById('stat-total-siswa').textContent = siswa.length || 0;
+                document.getElementById('stat-siswa-detail').textContent = `${siswa.length || 0} siswa terdaftar`;
+            } catch (error) {
+                console.error('Error loading total siswa:', error);
+                document.getElementById('stat-total-siswa').textContent = '0';
+                document.getElementById('stat-siswa-detail').textContent = 'Error';
+            }
+        }
+
+        async function loadAttendancePercentage() {
             try {
                 // Get all attendance records
                 const { data: kehadiran, error } = await supabaseClient
@@ -909,6 +1014,7 @@
                 
                 if (kehadiran.length === 0) {
                     document.getElementById('stat-kehadiran-rata').textContent = '0%';
+                    document.getElementById('stat-kehadiran-detail').textContent = 'Belum ada data';
                     return;
                 }
                 
@@ -941,10 +1047,185 @@
                 
                 const averagePercentage = studentCount > 0 ? Math.round(totalPercentage / studentCount) : 0;
                 document.getElementById('stat-kehadiran-rata').textContent = `${averagePercentage}%`;
+                document.getElementById('stat-kehadiran-detail').textContent = `Rata-rata ${studentCount} siswa`;
             } catch (error) {
                 console.error('Error calculating attendance percentage:', error);
                 document.getElementById('stat-kehadiran-rata').textContent = '0%';
+                document.getElementById('stat-kehadiran-detail').textContent = 'Error';
             }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                // Get recent activities from different tables
+                const [materi, jurnal, kehadiran] = await Promise.all([
+                    supabaseClient.from('materi').select('created_at, judul').order('created_at', { ascending: false }).limit(3),
+                    supabaseClient.from('jurnal').select('created_at, judul').order('created_at', { ascending: false }).limit(3),
+                    supabaseClient.from('kehadiran').select('created_at, status').order('created_at', { ascending: false }).limit(3)
+                ]);
+
+                const activities = [];
+                
+                // Process materi
+                materi.data.forEach(item => {
+                    activities.push({
+                        type: 'materi',
+                        title: item.judul,
+                        date: item.created_at,
+                        icon: '📚'
+                    });
+                });
+
+                // Process jurnal
+                jurnal.data.forEach(item => {
+                    activities.push({
+                        type: 'jurnal',
+                        title: item.judul,
+                        date: item.created_at,
+                        icon: '📝'
+                    });
+                });
+
+                // Process kehadiran
+                kehadiran.data.forEach(item => {
+                    activities.push({
+                        type: 'kehadiran',
+                        title: `Kehadiran ${item.status}`,
+                        date: item.created_at,
+                        icon: '✅'
+                    });
+                });
+
+                // Sort by date and take latest 5
+                activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+                const latestActivities = activities.slice(0, 5);
+
+                const activityContainer = document.getElementById('recent-activity');
+                activityContainer.innerHTML = latestActivities.map(activity => `
+                    <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
+                        <span class="text-lg">${activity.icon}</span>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-gray-800">${activity.title}</div>
+                            <div class="text-xs text-gray-500">${formatTimeAgo(activity.date)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                document.getElementById('recent-activity').innerHTML = '<p class="text-gray-500 text-sm">Gagal memuat aktivitas</p>';
+            }
+        }
+
+        async function loadKelasDistribution() {
+            try {
+                const { data: siswa, error } = await supabaseClient
+                    .from('siswa')
+                    .select('kelas');
+                
+                if (error) throw error;
+                
+                // Count students per class
+                const kelasCount = {};
+                siswa.forEach(item => {
+                    if (item.kelas) {
+                        kelasCount[item.kelas] = (kelasCount[item.kelas] || 0) + 1;
+                    }
+                });
+
+                const distributionContainer = document.getElementById('kelas-distribution');
+                distributionContainer.innerHTML = Object.entries(kelasCount)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5)
+                    .map(([kelas, count]) => `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="kelas-badge ${getKelasColor(kelas)}">${kelas}</span>
+                            </div>
+                            <span class="font-semibold">${count} siswa</span>
+                        </div>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading kelas distribution:', error);
+                document.getElementById('kelas-distribution').innerHTML = '<p class="text-gray-500 text-sm">Gagal memuat distribusi</p>';
+            }
+        }
+
+        async function loadTodayStatus() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Get today's attendance
+                const { data: kehadiran, error } = await supabaseClient
+                    .from('kehadiran')
+                    .select('status')
+                    .eq('tanggal', today);
+                
+                if (error) throw error;
+                
+                const statusCount = {
+                    hadir: 0,
+                    sakit: 0,
+                    izin: 0,
+                    alpha: 0
+                };
+
+                kehadiran.forEach(record => {
+                    if (statusCount.hasOwnProperty(record.status)) {
+                        statusCount[record.status]++;
+                    }
+                });
+
+                const statusContainer = document.getElementById('today-status');
+                statusContainer.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-600">✅</span>
+                            <span class="text-sm">Hadir</span>
+                        </div>
+                        <span class="font-semibold text-green-600">${statusCount.hadir}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-yellow-600">🤒</span>
+                            <span class="text-sm">Sakit</span>
+                        </div>
+                        <span class="font-semibold text-yellow-600">${statusCount.sakit}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-blue-600">📝</span>
+                            <span class="text-sm">Izin</span>
+                        </div>
+                        <span class="font-semibold text-blue-600">${statusCount.izin}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-red-600">❌</span>
+                            <span class="text-sm">Alpha</span>
+                        </div>
+                        <span class="font-semibold text-red-600">${statusCount.alpha}</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading today status:', error);
+                document.getElementById('today-status').innerHTML = '<p class="text-gray-500 text-sm">Gagal memuat status</p>';
+            }
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const past = new Date(date);
+            const diffMs = now - past;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Baru saja';
+            if (diffMins < 60) return `${diffMins} menit lalu`;
+            if (diffHours < 24) return `${diffHours} jam lalu`;
+            if (diffDays < 7) return `${diffDays} hari lalu`;
+            
+            return formatTanggal(date);
         }
 
         async function loadKelasContent() {
