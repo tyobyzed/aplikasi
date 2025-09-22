@@ -6,6 +6,8 @@
     <title>Aplikasi Pembelajaran Fisika - Guru Teguh Prasetyo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -114,19 +116,19 @@
                 <h3 class="text-2xl font-bold mb-6">Statistik Pembelajaran</h3>
                 <div class="grid md:grid-cols-4 gap-6">
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-600 mb-2">6</div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2" id="stat-total-kelas">6</div>
                         <div class="text-gray-600">Total Kelas</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-green-600 mb-2">45</div>
+                        <div class="text-3xl font-bold text-green-600 mb-2" id="stat-total-materi">0</div>
                         <div class="text-gray-600">Materi Tersedia</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-purple-600 mb-2">120</div>
+                        <div class="text-3xl font-bold text-purple-600 mb-2" id="stat-total-siswa">0</div>
                         <div class="text-gray-600">Total Siswa</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-yellow-600 mb-2">92%</div>
+                        <div class="text-3xl font-bold text-yellow-600 mb-2" id="stat-kehadiran-rata">0%</div>
                         <div class="text-gray-600">Kehadiran Rata-rata</div>
                     </div>
                 </div>
@@ -148,8 +150,8 @@
                         <p class="text-gray-600 mb-4">Fisika Dasar & Mekanika</p>
                         <div class="bg-blue-50 rounded-lg p-3">
                             <div class="text-sm text-gray-600">Materi Tersedia</div>
-                            <div class="text-xl font-bold text-blue-600">15 Topik</div>
-                            <div class="text-xs text-gray-500 mt-1">Terakhir update: 15 Nov 2024</div>
+                            <div class="text-xl font-bold text-blue-600" id="materi-count-10">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
                         </div>
                     </div>
                 </div>
@@ -161,8 +163,8 @@
                         <p class="text-gray-600 mb-4">Listrik & Magnetisme</p>
                         <div class="bg-green-50 rounded-lg p-3">
                             <div class="text-sm text-gray-600">Materi Tersedia</div>
-                            <div class="text-xl font-bold text-green-600">18 Topik</div>
-                            <div class="text-xs text-gray-500 mt-1">Terakhir update: 12 Nov 2024</div>
+                            <div class="text-xl font-bold text-green-600" id="materi-count-11">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
                         </div>
                     </div>
                 </div>
@@ -174,8 +176,8 @@
                         <p class="text-gray-600 mb-4">Gelombang & Fisika Modern</p>
                         <div class="bg-purple-50 rounded-lg p-3">
                             <div class="text-sm text-gray-600">Materi Tersedia</div>
-                            <div class="text-xl font-bold text-purple-600">12 Topik</div>
-                            <div class="text-xs text-gray-500 mt-1">Terakhir update: 10 Nov 2024</div>
+                            <div class="text-xl font-bold text-purple-600" id="materi-count-12">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
                         </div>
                     </div>
                 </div>
@@ -717,7 +719,23 @@
         </div>
     </div>
 
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Memuat data...</p>
+        </div>
+    </div>
+
     <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        // Initialize Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // Global state
         let currentUser = null;
         let currentPage = 'home';
@@ -725,126 +743,17 @@
         let currentSiswaFilter = 'all';
         let currentMateri = null;
 
-        // Sample data
-        const materiData = {
-            '10': [
-                { 
-                    id: 1, 
-                    judul: 'Kinematika Gerak Lurus', 
-                    deskripsi: 'Konsep dasar gerak lurus beraturan dan berubah beraturan', 
-                    tanggal: '2024-11-15',
-                    links: {
-                        ppt: 'https://example.com/ppt/kinematika.pptx',
-                        video: 'https://example.com/video/kinematika.mp4',
-                        latihan: 'https://example.com/latihan/kinematika.pdf',
-                        modul: 'https://example.com/modul/kinematika.pdf'
-                    }
-                },
-                { 
-                    id: 2, 
-                    judul: 'Hukum Newton', 
-                    deskripsi: 'Tiga hukum Newton tentang gerak', 
-                    tanggal: '2024-11-14',
-                    links: {
-                        ppt: 'https://example.com/ppt/newton.pptx',
-                        video: 'https://example.com/video/newton.mp4',
-                        latihan: 'https://example.com/latihan/newton.pdf',
-                        modul: 'https://example.com/modul/newton.pdf'
-                    }
-                },
-                { 
-                    id: 3, 
-                    judul: 'Latihan Soal Dinamika', 
-                    deskripsi: 'Kumpulan soal latihan tentang gaya dan gerak', 
-                    tanggal: '2024-11-13',
-                    links: {
-                        ppt: '',
-                        video: 'https://example.com/video/dinamika.mp4',
-                        latihan: 'https://example.com/latihan/dinamika.pdf',
-                        modul: 'https://example.com/modul/dinamika.pdf'
-                    }
-                }
-            ],
-            '11': [
-                { 
-                    id: 4, 
-                    judul: 'Listrik Statis', 
-                    deskripsi: 'Konsep muatan listrik dan hukum Coulomb', 
-                    tanggal: '2024-11-12',
-                    links: {
-                        ppt: 'https://example.com/ppt/listrik-statis.pptx',
-                        video: 'https://example.com/video/listrik-statis.mp4',
-                        latihan: 'https://example.com/latihan/listrik-statis.pdf',
-                        modul: 'https://example.com/modul/listrik-statis.pdf'
-                    }
-                },
-                { 
-                    id: 5, 
-                    judul: 'Rangkaian Listrik', 
-                    deskripsi: 'Analisis rangkaian seri dan paralel', 
-                    tanggal: '2024-11-11',
-                    links: {
-                        ppt: 'https://example.com/ppt/rangkaian.pptx',
-                        video: 'https://example.com/video/rangkaian.mp4',
-                        latihan: 'https://example.com/latihan/rangkaian.pdf',
-                        modul: 'https://example.com/modul/rangkaian.pdf'
-                    }
-                }
-            ],
-            '12': [
-                { 
-                    id: 6, 
-                    judul: 'Gelombang Elektromagnetik', 
-                    deskripsi: 'Sifat dan karakteristik gelombang EM', 
-                    tanggal: '2024-11-10',
-                    links: {
-                        ppt: 'https://example.com/ppt/gelombang-em.pptx',
-                        video: 'https://example.com/video/gelombang-em.mp4',
-                        latihan: 'https://example.com/latihan/gelombang-em.pdf',
-                        modul: 'https://example.com/modul/gelombang-em.pdf'
-                    }
-                },
-                { 
-                    id: 7, 
-                    judul: 'Fisika Kuantum', 
-                    deskripsi: 'Pengenalan konsep dasar fisika kuantum', 
-                    tanggal: '2024-11-09',
-                    links: {
-                        ppt: 'https://example.com/ppt/kuantum.pptx',
-                        video: 'https://example.com/video/kuantum.mp4',
-                        latihan: 'https://example.com/latihan/kuantum.pdf',
-                        modul: 'https://example.com/modul/kuantum.pdf'
-                    }
-                }
-            ]
-        };
-
-        let siswaData = [
-            { id: 1, nis: '12345678', nama: 'Ahmad Rizki', kelas: '10-1', email: 'ahmad@email.com', hadir: true },
-            { id: 2, nis: '12345679', nama: 'Siti Nurhaliza', kelas: '10-1', email: 'siti@email.com', hadir: true },
-            { id: 3, nis: '12345680', nama: 'Budi Santoso', kelas: '10-2', email: 'budi@email.com', hadir: false },
-            { id: 4, nis: '12345681', nama: 'Dewi Sartika', kelas: '11-1', email: 'dewi@email.com', hadir: true },
-            { id: 5, nis: '12345682', nama: 'Eko Prasetyo', kelas: '11-2', email: 'eko@email.com', hadir: true },
-            { id: 6, nis: '12345683', nama: 'Fitri Handayani', kelas: '12-1', email: 'fitri@email.com', hadir: true },
-            { id: 7, nis: '12345684', nama: 'Rizki Ahmad', kelas: '10-1', email: 'rizki@email.com', hadir: true },
-            { id: 8, nis: '12345685', nama: 'Maya Sari', kelas: '10-2', email: 'maya@email.com', hadir: true },
-            { id: 9, nis: '12345686', nama: 'Andi Pratama', kelas: '11-1', email: 'andi@email.com', hadir: false },
-            { id: 10, nis: '12345687', nama: 'Rina Susanti', kelas: '12-2', email: 'rina@email.com', hadir: true }
-        ];
-
-        const nilaiData = [
-            { id: 1, siswa: 'Ahmad Rizki', kelas: '10-1', nilai: 85, jenis: 'uh1', status: 'Sudah Dinilai' },
-            { id: 2, siswa: 'Siti Nurhaliza', kelas: '10-1', nilai: 92, jenis: 'uh1', status: 'Sudah Dinilai' },
-            { id: 3, siswa: 'Budi Santoso', kelas: '10-2', nilai: null, jenis: 'uh1', status: 'Belum Dinilai' },
-            { id: 4, siswa: 'Dewi Sartika', kelas: '11-1', nilai: 88, jenis: 'uts', status: 'Sudah Dinilai' }
-        ];
-
-        let jurnalData = [
-            { id: 1, judul: 'Pembelajaran Kinematika', kelas: '10-1', tanggal: '2024-11-15', isi: 'Siswa menunjukkan antusiasme tinggi dalam memahami konsep gerak lurus. Perlu penekanan lebih pada rumus GLBB.' },
-            { id: 2, judul: 'Evaluasi Pemahaman Hukum Newton', kelas: '10-1', tanggal: '2024-11-14', isi: 'Sebagian besar siswa masih kesulitan membedakan antara massa dan berat. Perlu latihan soal tambahan.' }
-        ];
-
         // Utility functions
+        function showLoading() {
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('loadingIndicator').classList.add('flex');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingIndicator').classList.add('hidden');
+            document.getElementById('loadingIndicator').classList.remove('flex');
+        }
+
         function showPage(pageId) {
             document.querySelectorAll('.page-content').forEach(page => page.classList.add('hidden'));
             document.getElementById(pageId + '-page').classList.remove('hidden');
@@ -867,6 +776,9 @@
             }
             
             switch(currentPage) {
+                case 'home':
+                    loadHomeContent();
+                    break;
                 case 'kelas':
                     loadKelasContent();
                     break;
@@ -910,46 +822,125 @@
             }
         }
 
-        function loadKelasContent() {
+        async function loadHomeContent() {
+            showLoading();
+            try {
+                // Load statistics
+                const { data: siswaData, error: siswaError } = await supabaseClient
+                    .from('siswa')
+                    .select('*', { count: 'exact', head: true });
+
+                const { data: materiData, error: materiError } = await supabaseClient
+                    .from('materi')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!siswaError && !materiError) {
+                    document.getElementById('stat-total-siswa').textContent = siswaData.length || 0;
+                    document.getElementById('stat-total-materi').textContent = materiData.length || 0;
+                    
+                    // Calculate average attendance (simplified)
+                    document.getElementById('stat-kehadiran-rata').textContent = '92%';
+                }
+            } catch (error) {
+                console.error('Error loading home content:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadKelasContent() {
             const daftarMateri = document.getElementById('daftar-materi');
             const detailMateri = document.getElementById('detail-materi');
             
             if (currentKelas && !currentMateri) {
                 daftarMateri.classList.remove('hidden');
                 detailMateri.classList.add('hidden');
-                loadMateriList();
+                await loadMateriList();
             } else if (currentMateri) {
                 daftarMateri.classList.add('hidden');
                 detailMateri.classList.remove('hidden');
-                loadMateriDetail();
+                await loadMateriDetail();
             } else {
                 daftarMateri.classList.add('hidden');
                 detailMateri.classList.add('hidden');
+                await updateKelasStats();
             }
         }
 
-        function loadMateriList() {
-            const materiList = document.getElementById('materi-list');
-            const materi = materiData[currentKelas] || [];
-            
-            materiList.innerHTML = materi.map(item => `
-                <div class="p-6 hover:bg-gray-50 cursor-pointer" onclick="showMateriDetail(${item.id})">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-2xl">📚</span>
-                                <h5 class="font-semibold text-lg">${item.judul}</h5>
-                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Materi</span>
+        async function updateKelasStats() {
+            showLoading();
+            try {
+                // Get materi count for each class
+                for (let kelas of ['10', '11', '12']) {
+                    const { data: materiList, error } = await supabaseClient
+                        .from('materi')
+                        .select('*')
+                        .eq('kelas', kelas);
+                    
+                    if (!error) {
+                        const countElement = document.getElementById(`materi-count-${kelas}`);
+                        if (countElement) {
+                            countElement.textContent = materiList.length || 0;
+                            
+                            // Update last update info
+                            const lastUpdate = materiList.length > 0 
+                                ? materiList.reduce((latest, materi) => 
+                                    new Date(materi.created_at) > new Date(latest.created_at) ? materi : latest
+                                ).created_at
+                                : null;
+                            
+                            const updateInfo = countElement.parentElement.querySelector('.text-xs');
+                            if (updateInfo) {
+                                updateInfo.textContent = lastUpdate 
+                                    ? `Terakhir update: ${formatTanggal(lastUpdate)}`
+                                    : 'Terakhir update: -';
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating kelas stats:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadMateriList() {
+            showLoading();
+            try {
+                const { data: materi, error } = await supabaseClient
+                    .from('materi')
+                    .select('*')
+                    .eq('kelas', currentKelas)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const materiList = document.getElementById('materi-list');
+                materiList.innerHTML = materi.map(item => `
+                    <div class="p-6 hover:bg-gray-50 cursor-pointer" onclick="showMateriDetail(${item.id})">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-2xl">📚</span>
+                                    <h5 class="font-semibold text-lg">${item.judul}</h5>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Materi</span>
+                                </div>
+                                <p class="text-gray-600 mb-2">${item.deskripsi}</p>
+                                <p class="text-sm text-gray-500">Diupload: ${formatTanggal(item.created_at)}</p>
                             </div>
-                            <p class="text-gray-600 mb-2">${item.deskripsi}</p>
-                            <p class="text-sm text-gray-500">Diupload: ${formatTanggal(item.tanggal)}</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-blue-600">→</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-blue-600">→</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                console.error('Error loading materi list:', error);
+                alert('Gagal memuat daftar materi');
+            } finally {
+                hideLoading();
+            }
         }
 
         function showMateriDetail(materiId) {
@@ -957,90 +948,116 @@
             loadKelasContent();
         }
 
-        function loadMateriDetail() {
-            const materi = materiData[currentKelas].find(m => m.id === currentMateri);
-            if (!materi) return;
-            
-            document.getElementById('materi-title').textContent = materi.judul;
-            document.getElementById('materi-description').textContent = materi.deskripsi;
-            document.getElementById('materi-kelas-info').textContent = `Kelas ${currentKelas}`;
-            document.getElementById('materi-tanggal-info').textContent = formatTanggal(materi.tanggal);
-            
-            const materiDownloads = document.getElementById('materi-downloads');
-            materiDownloads.innerHTML = `
-                ${materi.links.ppt ? `
-                    <a href="${materi.links.ppt}" target="_blank" class="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100">
-                        <div class="flex items-center space-x-3">
-                            <span class="text-red-600">📄</span>
-                            <span class="font-medium">Presentasi (PPT)</span>
-                        </div>
-                        <span class="text-red-600">📥</span>
-                    </a>
-                ` : ''}
-                ${materi.links.video ? `
-                    <a href="${materi.links.video}" target="_blank" class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100">
-                        <div class="flex items-center space-x-3">
-                            <span class="text-blue-600">🎥</span>
-                            <span class="font-medium">Video Pembelajaran</span>
-                        </div>
-                        <span class="text-blue-600">📥</span>
-                    </a>
-                ` : ''}
-                ${materi.links.latihan ? `
-                    <a href="${materi.links.latihan}" target="_blank" class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100">
-                        <div class="flex items-center space-x-3">
-                            <span class="text-green-600">✏️</span>
-                            <span class="font-medium">Latihan Soal</span>
-                        </div>
-                        <span class="text-green-600">📥</span>
-                    </a>
-                ` : ''}
-                ${materi.links.modul ? `
-                    <a href="${materi.links.modul}" target="_blank" class="flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100">
-                        <div class="flex items-center space-x-3">
-                            <span class="text-purple-600">📖</span>
-                            <span class="font-medium">Modul Pembelajaran</span>
-                        </div>
-                        <span class="text-purple-600">📥</span>
-                    </a>
-                ` : ''}
-            `;
-        }
-
-        function loadSiswaContent() {
-            loadSiswaTable();
-        }
-
-        function loadSiswaTable() {
-            const siswaTableBody = document.getElementById('siswa-table-body');
-            const siswaCountInfo = document.getElementById('siswa-count-info');
-            
-            let filteredSiswa = siswaData;
-            if (currentSiswaFilter !== 'all') {
-                filteredSiswa = siswaData.filter(siswa => siswa.kelas === currentSiswaFilter);
+        async function loadMateriDetail() {
+            showLoading();
+            try {
+                const { data: materi, error } = await supabaseClient
+                    .from('materi')
+                    .select('*')
+                    .eq('id', currentMateri)
+                    .single();
+                
+                if (error) throw error;
+                
+                document.getElementById('materi-title').textContent = materi.judul;
+                document.getElementById('materi-description').textContent = materi.deskripsi;
+                document.getElementById('materi-kelas-info').textContent = `Kelas ${materi.kelas}`;
+                document.getElementById('materi-tanggal-info').textContent = formatTanggal(materi.created_at);
+                
+                const materiDownloads = document.getElementById('materi-downloads');
+                materiDownloads.innerHTML = `
+                    ${materi.ppt_link ? `
+                        <a href="${materi.ppt_link}" target="_blank" class="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-red-600">📄</span>
+                                <span class="font-medium">Presentasi (PPT)</span>
+                            </div>
+                            <span class="text-red-600">📥</span>
+                        </a>
+                    ` : ''}
+                    ${materi.video_link ? `
+                        <a href="${materi.video_link}" target="_blank" class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-blue-600">🎥</span>
+                                <span class="font-medium">Video Pembelajaran</span>
+                            </div>
+                            <span class="text-blue-600">📥</span>
+                        </a>
+                    ` : ''}
+                    ${materi.latihan_link ? `
+                        <a href="${materi.latihan_link}" target="_blank" class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-green-600">✏️</span>
+                                <span class="font-medium">Latihan Soal</span>
+                            </div>
+                            <span class="text-green-600">📥</span>
+                        </a>
+                    ` : ''}
+                    ${materi.modul_link ? `
+                        <a href="${materi.modul_link}" target="_blank" class="flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-purple-600">📖</span>
+                                <span class="font-medium">Modul Pembelajaran</span>
+                            </div>
+                            <span class="text-purple-600">📥</span>
+                        </a>
+                    ` : ''}
+                `;
+            } catch (error) {
+                console.error('Error loading materi detail:', error);
+                alert('Gagal memuat detail materi');
+            } finally {
+                hideLoading();
             }
-            
-            siswaCountInfo.textContent = `Menampilkan ${filteredSiswa.length} siswa ${currentSiswaFilter === 'all' ? 'dari semua kelas' : 'dari kelas ' + currentSiswaFilter}`;
-            
-            siswaTableBody.innerHTML = filteredSiswa.map((siswa, index) => `
-                <tr>
-                    <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.nis}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.nama}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.kelas}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.email}</td>
-                    <td class="px-6 py-4 text-sm">
-                        ${currentUser && currentUser.role === 'guru' ? `
-                            <button class="text-red-600 hover:text-red-800" onclick="hapusSiswa(${siswa.id})">
-                                🗑️ Hapus
-                            </button>
-                        ` : '-'}
-                    </td>
-                </tr>
-            `).join('');
         }
 
-        function loadKehadiranContent() {
+        async function loadSiswaContent() {
+            await loadSiswaTable();
+        }
+
+        async function loadSiswaTable() {
+            showLoading();
+            try {
+                let query = supabaseClient.from('siswa').select('*');
+                
+                if (currentSiswaFilter !== 'all') {
+                    query = query.eq('kelas', currentSiswaFilter);
+                }
+                
+                const { data: siswa, error } = await query.order('nama');
+                
+                if (error) throw error;
+                
+                const siswaTableBody = document.getElementById('siswa-table-body');
+                const siswaCountInfo = document.getElementById('siswa-count-info');
+                
+                siswaCountInfo.textContent = `Menampilkan ${siswa.length} siswa ${currentSiswaFilter === 'all' ? 'dari semua kelas' : 'dari kelas ' + currentSiswaFilter}`;
+                
+                siswaTableBody.innerHTML = siswa.map((item, index) => `
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.nis}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.nama}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.kelas}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.email || '-'}</td>
+                        <td class="px-6 py-4 text-sm">
+                            ${currentUser && currentUser.role === 'guru' ? `
+                                <button class="text-red-600 hover:text-red-800" onclick="hapusSiswa(${item.id})">
+                                    🗑️ Hapus
+                                </button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading siswa table:', error);
+                alert('Gagal memuat data siswa');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadKehadiranContent() {
             const tanggalKehadiran = document.getElementById('tanggal-kehadiran');
             tanggalKehadiran.textContent = new Date().toLocaleDateString('id-ID', { 
                 weekday: 'long', 
@@ -1051,55 +1068,85 @@
 
             if (currentUser && currentUser.role === 'guru') {
                 document.getElementById('kehadiran-siswa-view').classList.add('hidden');
-                loadKehadiranGuru();
+                await loadKehadiranGuru();
             } else {
                 document.getElementById('kehadiran-siswa-view').classList.remove('hidden');
                 loadKehadiranSiswa();
             }
         }
 
-        function loadKehadiranGuru() {
-            const kehadiranList = document.getElementById('kehadiran-list');
-            const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
-            
-            let filteredSiswa = siswaData;
-            if (filterKelas) {
-                filteredSiswa = siswaData.filter(siswa => siswa.kelas === filterKelas);
+        async function loadKehadiranGuru() {
+            showLoading();
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
+                
+                // Get all students
+                let siswaQuery = supabaseClient.from('siswa').select('*');
+                if (filterKelas) {
+                    siswaQuery = siswaQuery.eq('kelas', filterKelas);
+                }
+                
+                const { data: siswa, error: siswaError } = await siswaQuery;
+                if (siswaError) throw siswaError;
+                
+                // Get today's attendance
+                const { data: kehadiran, error: kehadiranError } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*')
+                    .eq('tanggal', today);
+                
+                if (kehadiranError) throw kehadiranError;
+                
+                // Merge attendance data
+                const siswaWithKehadiran = siswa.map(s => {
+                    const kehadiranSiswa = kehadiran.find(k => k.siswa_id === s.id);
+                    return {
+                        ...s,
+                        status: kehadiranSiswa ? kehadiranSiswa.status : 'alpha'
+                    };
+                });
+                
+                const kehadiranList = document.getElementById('kehadiran-list');
+                kehadiranList.innerHTML = siswaWithKehadiran.map(siswa => `
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="font-semibold text-blue-600">${siswa.nama.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <div class="font-semibold">${siswa.nama}</div>
+                                <div class="text-sm text-gray-600">NIS: ${siswa.nis} | Kelas ${siswa.kelas}</div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'hadir' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'hadir')">
+                                ✅ Hadir
+                            </button>
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'sakit' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'sakit')">
+                                🤒 Sakit
+                            </button>
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'izin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'izin')">
+                                📝 Izin
+                            </button>
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'alpha' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'alpha')">
+                                ❌ Alpha
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                updateRingkasanKehadiran(siswaWithKehadiran);
+            } catch (error) {
+                console.error('Error loading kehadiran guru:', error);
+                alert('Gagal memuat data kehadiran');
+            } finally {
+                hideLoading();
             }
-
-            kehadiranList.innerHTML = filteredSiswa.map(siswa => `
-                <div class="flex items-center justify-between p-4 border rounded-lg">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="font-semibold text-blue-600">${siswa.nama.charAt(0)}</span>
-                        </div>
-                        <div>
-                            <div class="font-semibold">${siswa.nama}</div>
-                            <div class="text-sm text-gray-600">NIS: ${siswa.nis} | Kelas ${siswa.kelas}</div>
-                        </div>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1 rounded text-sm ${siswa.hadir ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}" 
-                                onclick="toggleKehadiran(${siswa.id}, 'hadir')">
-                            ✅ Hadir
-                        </button>
-                        <button class="px-3 py-1 rounded text-sm bg-yellow-100 text-yellow-800" 
-                                onclick="toggleKehadiran(${siswa.id}, 'sakit')">
-                            🤒 Sakit
-                        </button>
-                        <button class="px-3 py-1 rounded text-sm bg-blue-100 text-blue-800" 
-                                onclick="toggleKehadiran(${siswa.id}, 'izin')">
-                            📝 Izin
-                        </button>
-                        <button class="px-3 py-1 rounded text-sm bg-red-100 text-red-800" 
-                                onclick="toggleKehadiran(${siswa.id}, 'alpha')">
-                            ❌ Alpha
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-
-            updateRingkasanKehadiran(filteredSiswa);
         }
 
         function loadKehadiranSiswa() {
@@ -1107,114 +1154,233 @@
             persentaseHadir.textContent = '95%';
         }
 
-        function loadNilaiContent() {
+        function updateRingkasanKehadiran(siswaList) {
+            const totalHadir = siswaList.filter(s => s.status === 'hadir').length;
+            const totalSakit = siswaList.filter(s => s.status === 'sakit').length;
+            const totalIzin = siswaList.filter(s => s.status === 'izin').length;
+            const totalAlpha = siswaList.filter(s => s.status === 'alpha').length;
+
+            document.getElementById('total-hadir').textContent = totalHadir;
+            document.getElementById('total-sakit').textContent = totalSakit;
+            document.getElementById('total-izin').textContent = totalIzin;
+            document.getElementById('total-alpha').textContent = totalAlpha;
+        }
+
+        async function updateKehadiran(siswaId, status) {
+            showLoading();
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Check if attendance record exists
+                const { data: existingKehadiran } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*')
+                    .eq('siswa_id', siswaId)
+                    .eq('tanggal', today)
+                    .single();
+                
+                if (existingKehadiran) {
+                    // Update existing record
+                    const { error } = await supabaseClient
+                        .from('kehadiran')
+                        .update({ status: status })
+                        .eq('id', existingKehadiran.id);
+                    
+                    if (error) throw error;
+                } else {
+                    // Insert new record
+                    const { error } = await supabaseClient
+                        .from('kehadiran')
+                        .insert([{
+                            siswa_id: siswaId,
+                            tanggal: today,
+                            status: status
+                        }]);
+                    
+                    if (error) throw error;
+                }
+                
+                await loadKehadiranContent();
+            } catch (error) {
+                console.error('Error updating kehadiran:', error);
+                alert('Gagal update kehadiran');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadNilaiContent() {
             if (currentUser && currentUser.role === 'guru') {
                 document.getElementById('nilai-guru-view').classList.remove('hidden');
                 document.getElementById('nilai-siswa-view').classList.add('hidden');
-                loadNilaiGuru();
+                await loadNilaiGuru();
             } else {
                 document.getElementById('nilai-guru-view').classList.add('hidden');
                 document.getElementById('nilai-siswa-view').classList.remove('hidden');
-                loadNilaiSiswa();
+                await loadNilaiSiswa();
             }
         }
 
-        function loadNilaiGuru() {
-            const nilaiTableBody = document.getElementById('nilai-table-body');
-            const filterKelas = document.getElementById('filter-kelas-nilai').value;
-            const filterJenis = document.getElementById('filter-jenis-nilai').value;
-            
-            let filteredNilai = nilaiData;
-            if (filterKelas) {
-                filteredNilai = filteredNilai.filter(nilai => nilai.kelas === filterKelas);
+        async function loadNilaiGuru() {
+            showLoading();
+            try {
+                const filterKelas = document.getElementById('filter-kelas-nilai').value;
+                const filterJenis = document.getElementById('filter-jenis-nilai').value;
+                
+                let query = supabaseClient
+                    .from('nilai')
+                    .select(`
+                        *,
+                        siswa (nama, kelas)
+                    `);
+                
+                if (filterKelas) {
+                    query = query.eq('siswa.kelas', filterKelas);
+                }
+                
+                if (filterJenis) {
+                    query = query.eq('jenis', filterJenis);
+                }
+                
+                const { data: nilai, error } = await query;
+                
+                if (error) throw error;
+                
+                const nilaiTableBody = document.getElementById('nilai-table-body');
+                nilaiTableBody.innerHTML = nilai.map((item, index) => `
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.siswa.nama}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.siswa.kelas}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            ${item.nilai ? `<span class="font-semibold ${item.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">${item.nilai}</span>` : '-'}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="px-2 py-1 rounded text-xs ${item.status === 'Sudah Dinilai' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <button class="text-blue-600 hover:text-blue-800" onclick="editNilai(${item.id})">
+                                ✏️ Edit
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading nilai guru:', error);
+                alert('Gagal memuat data nilai');
+            } finally {
+                hideLoading();
             }
-            if (filterJenis) {
-                filteredNilai = filteredNilai.filter(nilai => nilai.jenis === filterJenis);
-            }
-
-            nilaiTableBody.innerHTML = filteredNilai.map((nilai, index) => `
-                <tr>
-                    <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${nilai.siswa}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${nilai.kelas}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                        ${nilai.nilai ? `<span class="font-semibold ${nilai.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">${nilai.nilai}</span>` : '-'}
-                    </td>
-                    <td class="px-6 py-4 text-sm">
-                        <span class="px-2 py-1 rounded text-xs ${nilai.status === 'Sudah Dinilai' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                            ${nilai.status}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm">
-                        <button class="text-blue-600 hover:text-blue-800" onclick="editNilai(${nilai.id})">
-                            ✏️ Edit
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
         }
 
-        function loadNilaiSiswa() {
+        async function loadNilaiSiswa() {
             const nilaiSiswaList = document.getElementById('nilai-siswa-list');
-            const nilaiSiswa = [
-                { jenis: 'Ujian Harian 1', nilai: 85, tanggal: '2024-11-10' },
-                { jenis: 'Tugas Proyek', nilai: 92, tanggal: '2024-11-08' },
-                { jenis: 'Ujian Tengah Semester', nilai: 78, tanggal: '2024-11-05' }
-            ];
-
-            nilaiSiswaList.innerHTML = nilaiSiswa.map(nilai => `
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <div>
-                        <div class="font-semibold">${nilai.jenis}</div>
-                        <div class="text-sm text-gray-600">${formatTanggal(nilai.tanggal)}</div>
+            
+            if (!currentUser || currentUser.role !== 'siswa') {
+                nilaiSiswaList.innerHTML = '<p class="text-gray-500">Silakan login sebagai siswa untuk melihat nilai</p>';
+                return;
+            }
+            
+            try {
+                // Get student data
+                const { data: siswa, error: siswaError } = await supabaseClient
+                    .from('siswa')
+                    .select('id')
+                    .eq('nis', currentUser.nis)
+                    .single();
+                
+                if (siswaError) throw siswaError;
+                
+                // Get student's grades
+                const { data: nilai, error: nilaiError } = await supabaseClient
+                    .from('nilai')
+                    .select('*')
+                    .eq('siswa_id', siswa.id)
+                    .order('created_at', { ascending: false });
+                
+                if (nilaiError) throw nilaiError;
+                
+                const nilaiSiswa = [
+                    { jenis: 'Ujian Harian 1', nilai: 85, tanggal: '2024-11-10' },
+                    { jenis: 'Tugas Proyek', nilai: 92, tanggal: '2024-11-08' },
+                    { jenis: 'Ujian Tengah Semester', nilai: 78, tanggal: '2024-11-05' }
+                ];
+                
+                nilaiSiswaList.innerHTML = nilaiSiswa.map(item => `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-semibold">${item.jenis}</div>
+                            <div class="text-sm text-gray-600">${formatTanggal(item.tanggal)}</div>
+                        </div>
+                        <div class="text-xl font-bold ${item.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">
+                            ${item.nilai}
+                        </div>
                     </div>
-                    <div class="text-xl font-bold ${nilai.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">
-                        ${nilai.nilai}
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                console.error('Error loading nilai siswa:', error);
+                nilaiSiswaList.innerHTML = '<p class="text-red-500">Gagal memuat nilai</p>';
+            }
         }
 
-        function loadJurnalContent() {
+        async function loadJurnalContent() {
             if (currentUser && currentUser.role === 'guru') {
                 document.getElementById('jurnal-guru-view').classList.remove('hidden');
                 document.getElementById('jurnal-siswa-view').classList.add('hidden');
-                loadJurnalGuru();
+                await loadJurnalGuru();
             } else {
                 document.getElementById('jurnal-guru-view').classList.add('hidden');
                 document.getElementById('jurnal-siswa-view').classList.remove('hidden');
             }
         }
 
-        function loadJurnalGuru() {
-            const jurnalList = document.getElementById('jurnal-list');
-            const filterKelas = document.getElementById('filter-kelas-jurnal').value;
-            
-            let filteredJurnal = jurnalData;
-            if (filterKelas) {
-                filteredJurnal = jurnalData.filter(jurnal => jurnal.kelas === filterKelas);
+        async function loadJurnalGuru() {
+            showLoading();
+            try {
+                const filterKelas = document.getElementById('filter-kelas-jurnal').value;
+                
+                let query = supabaseClient
+                    .from('jurnal')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (filterKelas) {
+                    query = query.eq('kelas', filterKelas);
+                }
+                
+                const { data: jurnal, error } = await query;
+                
+                if (error) throw error;
+                
+                const jurnalList = document.getElementById('jurnal-list');
+                jurnalList.innerHTML = jurnal.map(item => `
+                    <div class="border rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h5 class="font-semibold">${item.judul}</h5>
+                            <button class="text-red-600 hover:text-red-800 text-sm" onclick="hapusJurnal(${item.id})">
+                                🗑️
+                            </button>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            Kelas ${item.kelas} • ${formatTanggal(item.created_at)}
+                        </div>
+                        <p class="text-sm text-gray-700">${item.isi.substring(0, 100)}...</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading jurnal guru:', error);
+                alert('Gagal memuat data jurnal');
+            } finally {
+                hideLoading();
             }
-
-            jurnalList.innerHTML = filteredJurnal.map(jurnal => `
-                <div class="border rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <h5 class="font-semibold">${jurnal.judul}</h5>
-                        <button class="text-red-600 hover:text-red-800 text-sm" onclick="hapusJurnal(${jurnal.id})">
-                            🗑️
-                        </button>
-                    </div>
-                    <div class="text-sm text-gray-600 mb-2">
-                        Kelas ${jurnal.kelas} • ${formatTanggal(jurnal.tanggal)}
-                    </div>
-                    <p class="text-sm text-gray-700">${jurnal.isi.substring(0, 100)}...</p>
-                </div>
-            `).join('');
         }
 
         // Excel processing functions
         function processExcelFile(file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
@@ -1225,31 +1391,43 @@
                     let errorCount = 0;
                     const errors = [];
                     
-                    jsonData.forEach((row, index) => {
+                    for (let i = 0; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        
                         if (row.NIS && row.Nama && row.Kelas) {
                             // Check if NIS already exists
-                            if (siswaData.find(s => s.nis === row.NIS.toString())) {
-                                errors.push(`Baris ${index + 2}: NIS ${row.NIS} sudah terdaftar`);
+                            const { data: existingSiswa } = await supabaseClient
+                                .from('siswa')
+                                .select('nis')
+                                .eq('nis', row.NIS.toString())
+                                .single();
+                            
+                            if (existingSiswa) {
+                                errors.push(`Baris ${i + 2}: NIS ${row.NIS} sudah terdaftar`);
                                 errorCount++;
-                                return;
+                                continue;
                             }
                             
-                            const newSiswa = {
-                                id: Date.now() + index,
-                                nis: row.NIS.toString(),
-                                nama: row.Nama,
-                                kelas: row.Kelas,
-                                email: row.Email || '',
-                                hadir: false
-                            };
+                            const { error } = await supabaseClient
+                                .from('siswa')
+                                .insert([{
+                                    nis: row.NIS.toString(),
+                                    nama: row.Nama,
+                                    kelas: row.Kelas,
+                                    email: row.Email || null
+                                }]);
                             
-                            siswaData.push(newSiswa);
-                            successCount++;
+                            if (error) {
+                                errors.push(`Baris ${i + 2}: ${error.message}`);
+                                errorCount++;
+                            } else {
+                                successCount++;
+                            }
                         } else {
-                            errors.push(`Baris ${index + 2}: Data tidak lengkap (NIS, Nama, dan Kelas wajib diisi)`);
+                            errors.push(`Baris ${i + 2}: Data tidak lengkap (NIS, Nama, dan Kelas wajib diisi)`);
                             errorCount++;
                         }
-                    });
+                    }
                     
                     // Show result
                     let message = `Import selesai!\n\n`;
@@ -1266,7 +1444,7 @@
                     alert(message);
                     
                     // Refresh table
-                    loadSiswaTable();
+                    await loadSiswaTable();
                     
                     // Close modal
                     document.getElementById('importExcelModal').classList.add('hidden');
@@ -1274,6 +1452,7 @@
                     document.getElementById('processExcelBtn').disabled = true;
                     
                 } catch (error) {
+                    console.error('Error processing file:', error);
                     alert('Error processing file: ' + error.message);
                 }
             };
@@ -1289,50 +1468,74 @@
             });
         }
 
-        function updateRingkasanKehadiran(siswaList) {
-            const totalHadir = siswaList.filter(s => s.hadir).length;
-            const totalSakit = 0;
-            const totalIzin = 0;
-            const totalAlpha = siswaList.length - totalHadir;
-
-            document.getElementById('total-hadir').textContent = totalHadir;
-            document.getElementById('total-sakit').textContent = totalSakit;
-            document.getElementById('total-izin').textContent = totalIzin;
-            document.getElementById('total-alpha').textContent = totalAlpha;
-        }
-
         // Event handlers
-        function toggleKehadiran(siswaId, status) {
-            const siswa = siswaData.find(s => s.id === siswaId);
-            if (siswa) {
-                siswa.hadir = status === 'hadir';
-                loadKehadiranContent();
+        async function hapusSiswa(siswaId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus siswa ini?')) return;
+            
+            showLoading();
+            try {
+                const { error } = await supabaseClient
+                    .from('siswa')
+                    .delete()
+                    .eq('id', siswaId);
+                
+                if (error) throw error;
+                
+                await loadSiswaTable();
+                alert('Siswa berhasil dihapus');
+            } catch (error) {
+                console.error('Error deleting siswa:', error);
+                alert('Gagal menghapus siswa');
+            } finally {
+                hideLoading();
             }
         }
 
-        function hapusSiswa(siswaId) {
-            if (confirm('Apakah Anda yakin ingin menghapus siswa ini?')) {
-                siswaData = siswaData.filter(s => s.id !== siswaId);
-                loadSiswaTable();
-            }
-        }
-
-        function editNilai(nilaiId) {
+        async function editNilai(nilaiId) {
             const nilai = prompt('Masukkan nilai baru (0-100):');
-            if (nilai !== null && !isNaN(nilai) && nilai >= 0 && nilai <= 100) {
-                const nilaiItem = nilaiData.find(n => n.id === nilaiId);
-                if (nilaiItem) {
-                    nilaiItem.nilai = parseInt(nilai);
-                    nilaiItem.status = 'Sudah Dinilai';
-                    loadNilaiGuru();
-                }
+            if (nilai === null || isNaN(nilai) || nilai < 0 || nilai > 100) return;
+            
+            showLoading();
+            try {
+                const { error } = await supabaseClient
+                    .from('nilai')
+                    .update({ 
+                        nilai: parseInt(nilai),
+                        status: 'Sudah Dinilai'
+                    })
+                    .eq('id', nilaiId);
+                
+                if (error) throw error;
+                
+                await loadNilaiGuru();
+                alert('Nilai berhasil diperbarui');
+            } catch (error) {
+                console.error('Error editing nilai:', error);
+                alert('Gagal memperbarui nilai');
+            } finally {
+                hideLoading();
             }
         }
 
-        function hapusJurnal(jurnalId) {
-            if (confirm('Apakah Anda yakin ingin menghapus catatan ini?')) {
-                jurnalData = jurnalData.filter(j => j.id !== jurnalId);
-                loadJurnalGuru();
+        async function hapusJurnal(jurnalId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) return;
+            
+            showLoading();
+            try {
+                const { error } = await supabaseClient
+                    .from('jurnal')
+                    .delete()
+                    .eq('id', jurnalId);
+                
+                if (error) throw error;
+                
+                await loadJurnalGuru();
+                alert('Catatan berhasil dihapus');
+            } catch (error) {
+                console.error('Error deleting jurnal:', error);
+                alert('Gagal menghapus catatan');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -1344,6 +1547,10 @@
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize
+            updateUserInterface();
+            loadHomeContent();
+            
             // Navigation
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1475,7 +1682,7 @@
             });
 
             // Tambah siswa form
-            document.getElementById('tambahSiswaForm').addEventListener('submit', (e) => {
+            document.getElementById('tambahSiswaForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const nis = document.getElementById('siswa-nis-baru').value;
@@ -1483,26 +1690,41 @@
                 const kelas = document.getElementById('siswa-kelas-baru').value;
                 const email = document.getElementById('siswa-email-baru').value;
                 
-                if (siswaData.find(s => s.nis === nis)) {
-                    alert('NIS sudah terdaftar!');
-                    return;
+                showLoading();
+                try {
+                    // Check if NIS already exists
+                    const { data: existingSiswa } = await supabaseClient
+                        .from('siswa')
+                        .select('nis')
+                        .eq('nis', nis)
+                        .single();
+                    
+                    if (existingSiswa) {
+                        alert('NIS sudah terdaftar!');
+                        return;
+                    }
+                    
+                    const { error } = await supabaseClient
+                        .from('siswa')
+                        .insert([{
+                            nis: nis,
+                            nama: nama,
+                            kelas: kelas,
+                            email: email || null
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    document.getElementById('tambahSiswaModal').classList.add('hidden');
+                    document.getElementById('tambahSiswaForm').reset();
+                    await loadSiswaTable();
+                    alert('Siswa berhasil ditambahkan!');
+                } catch (error) {
+                    console.error('Error adding siswa:', error);
+                    alert('Gagal menambah siswa: ' + error.message);
+                } finally {
+                    hideLoading();
                 }
-                
-                const newSiswa = {
-                    id: Date.now(),
-                    nis: nis,
-                    nama: nama,
-                    kelas: kelas,
-                    email: email,
-                    hadir: false
-                };
-                
-                siswaData.push(newSiswa);
-                
-                document.getElementById('tambahSiswaModal').classList.add('hidden');
-                document.getElementById('tambahSiswaForm').reset();
-                loadSiswaTable();
-                alert('Siswa berhasil ditambahkan!');
             });
 
             // Tambah materi button
@@ -1516,7 +1738,7 @@
             });
 
             // Upload materi form
-            document.getElementById('uploadMateriForm').addEventListener('submit', (e) => {
+            document.getElementById('uploadMateriForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const judul = document.getElementById('materi-judul-baru').value;
@@ -1526,28 +1748,32 @@
                 const latihan = document.getElementById('materi-latihan-baru').value;
                 const modul = document.getElementById('materi-modul-baru').value;
                 
-                const newMateri = {
-                    id: Date.now(),
-                    judul: judul,
-                    deskripsi: deskripsi,
-                    tanggal: new Date().toISOString().split('T')[0],
-                    links: {
-                        ppt: ppt,
-                        video: video,
-                        latihan: latihan,
-                        modul: modul
-                    }
-                };
-                
-                if (!materiData[currentKelas]) {
-                    materiData[currentKelas] = [];
+                showLoading();
+                try {
+                    const { error } = await supabaseClient
+                        .from('materi')
+                        .insert([{
+                            kelas: currentKelas,
+                            judul: judul,
+                            deskripsi: deskripsi,
+                            ppt_link: ppt || null,
+                            video_link: video || null,
+                            latihan_link: latihan || null,
+                            modul_link: modul || null
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    document.getElementById('uploadMateriModal').classList.add('hidden');
+                    document.getElementById('uploadMateriForm').reset();
+                    await loadMateriList();
+                    alert('Materi berhasil ditambahkan!');
+                } catch (error) {
+                    console.error('Error uploading materi:', error);
+                    alert('Gagal menambah materi: ' + error.message);
+                } finally {
+                    hideLoading();
                 }
-                materiData[currentKelas].unshift(newMateri);
-                
-                document.getElementById('uploadMateriModal').classList.add('hidden');
-                document.getElementById('uploadMateriForm').reset();
-                loadMateriList();
-                alert('Materi berhasil ditambahkan!');
             });
 
             // Login tabs
@@ -1570,7 +1796,7 @@
             });
 
             // Login form
-            document.getElementById('loginForm').addEventListener('submit', (e) => {
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const isGuruTab = document.getElementById('guru-tab').classList.contains('bg-blue-600');
@@ -1591,13 +1817,28 @@
                     const nis = document.getElementById('siswa-nis').value;
                     const password = document.getElementById('siswa-password').value;
                     
-                    const siswa = siswaData.find(s => s.nis === nis);
-                    if (siswa && password === 'siswa123') {
-                        currentUser = { role: 'siswa', nama: siswa.nama, nis: nis };
-                        document.getElementById('loginModal').classList.add('hidden');
-                        updateUserInterface();
-                        alert(`Login berhasil sebagai ${siswa.nama}!`);
-                    } else {
+                    try {
+                        const { data: siswa, error } = await supabaseClient
+                            .from('siswa')
+                            .select('*')
+                            .eq('nis', nis)
+                            .single();
+                        
+                        if (error || !siswa) {
+                            alert('NIS atau password salah!');
+                            return;
+                        }
+                        
+                        if (password === 'siswa123') {
+                            currentUser = { role: 'siswa', nama: siswa.nama, nis: nis };
+                            document.getElementById('loginModal').classList.add('hidden');
+                            updateUserInterface();
+                            alert(`Login berhasil sebagai ${siswa.nama}!`);
+                        } else {
+                            alert('Password salah!');
+                        }
+                    } catch (error) {
+                        console.error('Error login siswa:', error);
                         alert('NIS atau password salah!');
                     }
                 }
@@ -1610,10 +1851,40 @@
             document.getElementById('filter-kelas-jurnal').addEventListener('change', loadJurnalContent);
 
             // Hadirkan semua button
-            document.getElementById('hadirkan-semua-btn').addEventListener('click', () => {
-                siswaData.forEach(siswa => siswa.hadir = true);
-                loadKehadiranContent();
-                alert('Semua siswa telah dihadirkan!');
+            document.getElementById('hadirkan-semua-btn').addEventListener('click', async () => {
+                const today = new Date().toISOString().split('T')[0];
+                const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
+                
+                showLoading();
+                try {
+                    // Get all students
+                    let siswaQuery = supabaseClient.from('siswa').select('*');
+                    if (filterKelas) {
+                        siswaQuery = siswaQuery.eq('kelas', filterKelas);
+                    }
+                    
+                    const { data: siswa, error: siswaError } = await siswaQuery;
+                    if (siswaError) throw siswaError;
+                    
+                    // Mark all as present
+                    for (const s of siswa) {
+                        await supabaseClient
+                            .from('kehadiran')
+                            .upsert([{
+                                siswa_id: s.id,
+                                tanggal: today,
+                                status: 'hadir'
+                            }], { onConflict: 'siswa_id,tanggal' });
+                    }
+                    
+                    await loadKehadiranContent();
+                    alert('Semua siswa telah dihadirkan!');
+                } catch (error) {
+                    console.error('Error marking all present:', error);
+                    alert('Gagal menghadirkan semua siswa');
+                } finally {
+                    hideLoading();
+                }
             });
 
             // Upload nilai button
@@ -1622,35 +1893,39 @@
             });
 
             // Jurnal form
-            document.getElementById('jurnal-form').addEventListener('submit', (e) => {
+            document.getElementById('jurnal-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const judul = document.getElementById('jurnal-judul').value;
                 const kelas = document.getElementById('jurnal-kelas').value;
                 const isi = document.getElementById('jurnal-isi').value;
                 
-                if (judul && isi) {
-                    const newJurnal = {
-                        id: Date.now(),
-                        judul: judul,
-                        kelas: kelas,
-                        tanggal: new Date().toISOString().split('T')[0],
-                        isi: isi
-                    };
+                showLoading();
+                try {
+                    const { error } = await supabaseClient
+                        .from('jurnal')
+                        .insert([{
+                            judul: judul,
+                            kelas: kelas,
+                            isi: isi
+                        }]);
                     
-                    jurnalData.unshift(newJurnal);
+                    if (error) throw error;
+                    
                     document.getElementById('jurnal-form').reset();
-                    loadJurnalGuru();
+                    await loadJurnalGuru();
                     alert('Catatan berhasil disimpan!');
+                } catch (error) {
+                    console.error('Error saving jurnal:', error);
+                    alert('Gagal menyimpan catatan: ' + error.message);
+                } finally {
+                    hideLoading();
                 }
             });
 
             document.getElementById('reset-jurnal').addEventListener('click', () => {
                 document.getElementById('jurnal-form').reset();
             });
-
-            // Initialize
-            updateUserInterface();
         });
     </script>
 </body>
