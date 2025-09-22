@@ -971,14 +971,15 @@
 
         async function loadTotalMateri() {
             try {
-                const { data: materi, error } = await supabaseClient
+                // Menggunakan metode count untuk mendapatkan jumlah materi
+                const { count, error } = await supabaseClient
                     .from('materi')
                     .select('*', { count: 'exact', head: true });
-
+                
                 if (error) throw error;
                 
-                document.getElementById('stat-total-materi').textContent = materi.length || 0;
-                document.getElementById('stat-materi-detail').textContent = `${materi.length || 0} materi tersedia`;
+                document.getElementById('stat-total-materi').textContent = count || 0;
+                document.getElementById('stat-materi-detail').textContent = `${count || 0} materi tersedia`;
             } catch (error) {
                 console.error('Error loading total materi:', error);
                 document.getElementById('stat-total-materi').textContent = '0';
@@ -988,21 +989,22 @@
 
         async function loadTotalSiswa() {
             try {
-                const { data: siswa, error } = await supabaseClient
+                // Menggunakan metode count untuk mendapatkan jumlah siswa
+                const { count, error } = await supabaseClient
                     .from('siswa')
                     .select('*', { count: 'exact', head: true });
-
+                
                 if (error) throw error;
                 
-                document.getElementById('stat-total-siswa').textContent = siswa.length || 0;
-                document.getElementById('stat-siswa-detail').textContent = `${siswa.length || 0} siswa terdaftar`;
+                document.getElementById('stat-total-siswa').textContent = count || 0;
+                document.getElementById('stat-siswa-detail').textContent = `${count || 0} siswa terdaftar`;
             } catch (error) {
                 console.error('Error loading total siswa:', error);
                 document.getElementById('stat-total-siswa').textContent = '0';
                 document.getElementById('stat-siswa-detail').textContent = 'Error';
             }
         }
-
+        
         async function loadAttendancePercentage() {
             try {
                 // Get all attendance records
