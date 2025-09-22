@@ -1004,17 +1004,14 @@
             formSelect.value = formCurrentValue;
         }
 
-        // PERBAIKAN: Fungsi updateUploadMateriModal yang benar
         function updateUploadMateriModal(kelasList) {
             const select = document.getElementById('materi-kelas-baru');
             const currentValue = select.value;
             
-            // Hapus semua opsi yang ada
             while (select.children.length > 0) {
-                select.removeChild(select.firstChild);
+                select.removeChild(selectSelect.firstChild);
             }
             
-            // Tambah opsi baru untuk setiap kelas
             kelasList.forEach(kelas => {
                 const option = document.createElement('option');
                 option.value = kelas;
@@ -1022,10 +1019,7 @@
                 select.appendChild(option);
             });
             
-            // Kembalikan nilai yang sebelumnya dipilih jika masih ada
-            if (currentValue && kelasList.includes(currentValue)) {
-                select.value = currentValue;
-            }
+            select.value = currentValue;
         }
 
         async function loadKelasContent() {
@@ -2019,3 +2013,84 @@
             document.getElementById('filter-kelas-nilai').addEventListener('change', loadNilaiContent);
             document.getElementById('filter-jenis-nilai').addEventListener('change', loadNilaiContent);
             document.getElementById('filter-kelas-jurnal').addEventListener('change', loadJurnalContent);
+
+            // Hadirkan semua button
+            document.getElementById('hadirkan-semua-btn').addEventListener('click', async () => {
+                const today = new Date().toISOString().split('T')[0];
+                const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
+                
+                showLoading();
+                try {
+                    // Get all students
+                    let siswaQuery = supabaseClient.from('siswa').select('*');
+                    if (filterKelas) {
+                        siswaQuery = siswaQuery.eq('kelas', filterKelas);
+                    }
+                    
+                    const { data: siswa, error: siswaError } = await siswaQuery;
+                    if (siswaError) throw siswaError;
+                    
+                    // Mark all as present
+                    for (const s of siswa) {
+                        await supabaseClient
+                            .from('kehadiran')
+                            .upsert([{
+                                siswa_id: s.id,
+                                tanggal: today,
+                                status: 'hadir'
+                            }], { onConflict: 'siswa_id,tanggal' });
+                    }
+                    
+                    await loadKehadiranContent();
+                    alert('Semua siswa telah dihadirkan!');
+                } catch (error) {
+                    console.error('Error marking all present:', error);
+                    alert('Gagal menghadirkan semua siswa');
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            // Upload nilai button
+            document.getElementById('upload-nilai-btn').addEventListener('click', () => {
+                alert('Fitur upload nilai akan membuka dialog untuk upload file Excel/CSV atau input manual.');
+            });
+
+            // Jurnal form
+            document.getElementById('jurnal-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const judul = document.getElementById('jurnal-judul').value;
+                const kelas = document.getElementById('jurnal-kelas').value;
+                const isi = document.getElementById('jurnal-isi').value;
+                
+                showLoading();
+                try {
+                    const { error } = await supabaseClient
+                        .from('jurnal')
+                        .insert([{
+                            judul: judul,
+                            kelas: kelas,
+                            isi: isi
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    document.getElementById('jurnal-form').reset();
+                    await loadJurnalGuru();
+                    alert('Catatan berhasil disimpan!');
+                } catch (error) {
+                    console.error('Error saving jurnal:', error);
+                    alert('Gagal menyimpan catatan: ' + error.message);
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            document.getElementById('reset-jurnal').addEventListener('click', () => {
+                document.getElementById('jurnal-form').reset();
+            });
+        });
+    </script>
+</body>
+</html>
