@@ -642,7 +642,7 @@
         </div>
     </main>
 
-    <!-- Login Modal tetap sama -->
+    <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
             <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
@@ -685,6 +685,13 @@
                     </button>
                 </div>
             </form>
+            
+            <!-- Tambahkan informasi login -->
+            <div class="mt-6 text-center text-sm text-gray-600">
+                <p class="mb-2">Informasi Login:</p>
+                <p class="font-semibold">Guru: teguh@example.com / guru123</p>
+                <p class="font-semibold">Siswa: Gunakan NIS yang terdaftar / siswa123</p>
+            </div>
         </div>
     </div>
 
@@ -929,17 +936,18 @@
             ]
         };
 
+        // Data siswa dengan password untuk login
         let siswaData = [
-            { id: 1, nis: '12345678', nama: 'Ahmad Rizki', kelas: '10-1', email: 'ahmad@email.com', hadir: true },
-            { id: 2, nis: '12345679', nama: 'Siti Nurhaliza', kelas: '10-1', email: 'siti@email.com', hadir: true },
-            { id: 3, nis: '12345680', nama: 'Budi Santoso', kelas: '10-2', email: 'budi@email.com', hadir: false },
-            { id: 4, nis: '12345681', nama: 'Dewi Sartika', kelas: '11-1', email: 'dewi@email.com', hadir: true },
-            { id: 5, nis: '12345682', nama: 'Eko Prasetyo', kelas: '11-2', email: 'eko@email.com', hadir: true },
-            { id: 6, nis: '12345683', nama: 'Fitri Handayani', kelas: '12-1', email: 'fitri@email.com', hadir: true },
-            { id: 7, nis: '12345684', nama: 'Rizki Ahmad', kelas: '10-1', email: 'rizki@email.com', hadir: true },
-            { id: 8, nis: '12345685', nama: 'Maya Sari', kelas: '10-2', email: 'maya@email.com', hadir: true },
-            { id: 9, nis: '12345686', nama: 'Andi Pratama', kelas: '11-1', email: 'andi@email.com', hadir: false },
-            { id: 10, nis: '12345687', nama: 'Rina Susanti', kelas: '12-2', email: 'rina@email.com', hadir: true }
+            { id: 1, nis: '12345678', nama: 'Ahmad Rizki', kelas: '10-1', email: 'ahmad@email.com', hadir: true, password: 'siswa123' },
+            { id: 2, nis: '12345679', nama: 'Siti Nurhaliza', kelas: '10-1', email: 'siti@email.com', hadir: true, password: 'siswa123' },
+            { id: 3, nis: '12345680', nama: 'Budi Santoso', kelas: '10-2', email: 'budi@email.com', hadir: false, password: 'siswa123' },
+            { id: 4, nis: '12345681', nama: 'Dewi Sartika', kelas: '11-1', email: 'dewi@email.com', hadir: true, password: 'siswa123' },
+            { id: 5, nis: '12345682', nama: 'Eko Prasetyo', kelas: '11-2', email: 'eko@email.com', hadir: true, password: 'siswa123' },
+            { id: 6, nis: '12345683', nama: 'Fitri Handayani', kelas: '12-1', email: 'fitri@email.com', hadir: true, password: 'siswa123' },
+            { id: 7, nis: '12345684', nama: 'Rizki Ahmad', kelas: '10-1', email: 'rizki@email.com', hadir: true, password: 'siswa123' },
+            { id: 8, nis: '12345685', nama: 'Maya Sari', kelas: '10-2', email: 'maya@email.com', hadir: true, password: 'siswa123' },
+            { id: 9, nis: '12345686', nama: 'Andi Pratama', kelas: '11-1', email: 'andi@email.com', hadir: false, password: 'siswa123' },
+            { id: 10, nis: '12345687', nama: 'Rina Susanti', kelas: '12-2', email: 'rina@email.com', hadir: true, password: 'siswa123' }
         ];
 
         const nilaiData = [
@@ -1350,7 +1358,8 @@
                                 nama: row.Nama,
                                 kelas: row.Kelas,
                                 email: row.Email || '',
-                                hadir: false
+                                hadir: false,
+                                password: 'siswa123' // Default password for imported students
                             };
                             
                             siswaData.push(newSiswa);
@@ -1656,7 +1665,8 @@
                     nama: nama,
                     kelas: kelas,
                     email: email,
-                    hadir: false
+                    hadir: false,
+                    password: 'siswa123' // Default password
                 };
                 
                 siswaData.push(newSiswa);
@@ -1737,7 +1747,7 @@
                 document.getElementById('guru-form').classList.add('hidden');
             });
 
-            // Login form
+            // Login form - PERBAIKAN UTAMA
             document.getElementById('loginForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 
@@ -1747,11 +1757,26 @@
                     const email = document.getElementById('guru-email').value;
                     const password = document.getElementById('guru-password').value;
                     
+                    // Validasi input
+                    if (!email || !password) {
+                        showNotification('Email dan password harus diisi!', 'error');
+                        return;
+                    }
+                    
+                    // Cek kredensial guru
                     if (email === 'teguh@example.com' && password === 'guru123') {
-                        currentUser = { role: 'guru', nama: 'Teguh Prasetyo', email: email };
+                        currentUser = { 
+                            role: 'guru', 
+                            nama: 'Teguh Prasetyo', 
+                            email: email 
+                        };
                         document.getElementById('loginModal').classList.add('hidden');
                         updateUserInterface();
                         showNotification('Login berhasil sebagai Guru!');
+                        
+                        // Reset form
+                        document.getElementById('guru-email').value = '';
+                        document.getElementById('guru-password').value = '';
                     } else {
                         showNotification('Email atau password salah!', 'error');
                     }
@@ -1759,12 +1784,28 @@
                     const nis = document.getElementById('siswa-nis').value;
                     const password = document.getElementById('siswa-password').value;
                     
+                    // Validasi input
+                    if (!nis || !password) {
+                        showNotification('NIS dan password harus diisi!', 'error');
+                        return;
+                    }
+                    
+                    // Cek kredensial siswa
                     const siswa = siswaData.find(s => s.nis === nis);
-                    if (siswa && password === 'siswa123') {
-                        currentUser = { role: 'siswa', nama: siswa.nama, nis: nis };
+                    if (siswa && siswa.password === password) {
+                        currentUser = { 
+                            role: 'siswa', 
+                            nama: siswa.nama, 
+                            nis: nis,
+                            kelas: siswa.kelas
+                        };
                         document.getElementById('loginModal').classList.add('hidden');
                         updateUserInterface();
                         showNotification(`Login berhasil sebagai ${siswa.nama}!`);
+                        
+                        // Reset form
+                        document.getElementById('siswa-nis').value = '';
+                        document.getElementById('siswa-password').value = '';
                     } else {
                         showNotification('NIS atau password salah!', 'error');
                     }
