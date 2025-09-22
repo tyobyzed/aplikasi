@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pembelajaran Fisika - Guru Teguh Prasetyo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .file-upload-area {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background-color: #f7fafc;
+        }
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #ebf4ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                        <span class="text-2xl">⚛️</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Guru Teguh Prasetyo</h1>
+                        <p class="text-sm opacity-90">Pembelajaran Fisika Interaktif</p>
+                    </div>
+                </div>
+                <button id="loginBtn" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                    Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-8 overflow-x-auto">
+                <button class="nav-btn py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-semibold whitespace-nowrap" data-page="home">
+                    🏠 Beranda
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="kelas">
+                    📚 Kelas
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="siswa">
+                    👥 Siswa
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="kehadiran">
+                    ✅ Kehadiran
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="nilai">
+                    📊 Daftar Nilai
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="jurnal">
+                    📝 Jurnal Guru
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Home Page -->
+        <div id="home-page" class="page-content">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Selamat Datang di Pembelajaran Fisika</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Platform pembelajaran interaktif untuk memudahkan proses belajar mengajar fisika dengan fitur lengkap manajemen kelas, nilai, dan kehadiran.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="kelas">
+                    <div class="text-4xl mb-4">📚</div>
+                    <h3 class="text-xl font-semibold mb-2">Kelas</h3>
+                    <p class="text-gray-600">Akses materi pembelajaran</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="siswa">
+                    <div class="text-4xl mb-4">👥</div>
+                    <h3 class="text-xl font-semibold mb-2">Siswa</h3>
+                    <p class="text-gray-600">Kelola data siswa</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="kehadiran">
+                    <div class="text-4xl mb-4">✅</div>
+                    <h3 class="text-xl font-semibold mb-2">Kehadiran</h3>
+                    <p class="text-gray-600">Pantau kehadiran siswa</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="nilai">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold mb-2">Nilai</h3>
+                    <p class="text-gray-600">Kelola nilai siswa</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="jurnal">
+                    <div class="text-4xl mb-4">📝</div>
+                    <h3 class="text-xl font-semibold mb-2">Jurnal</h3>
+                    <p class="text-gray-600">Catat kegiatan pembelajaran</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold mb-6">Statistik Pembelajaran</h3>
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">6</div>
+                        <div class="text-gray-600">Total Kelas</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-600 mb-2">45</div>
+                        <div class="text-gray-600">Materi Tersedia</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-purple-600 mb-2">120</div>
+                        <div class="text-gray-600">Total Siswa</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-yellow-600 mb-2">92%</div>
+                        <div class="text-gray-600">Kehadiran Rata-rata</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kelas Page -->
+        <div id="kelas-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Pilih Kelas</h2>
+                <div id="user-role-indicator" class="text-sm text-gray-600"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="10">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">🔬</div>
+                        <h3 class="text-2xl font-bold mb-2">Kelas 10</h3>
+                        <p class="text-gray-600 mb-4">Fisika Dasar & Mekanika</p>
+                        <div class="bg-blue-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Materi Tersedia</div>
+                            <div class="text-xl font-bold text-blue-600">15 Topik</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: 15 Nov 2024</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="11">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">⚡</div>
+                        <h3 class="text-2xl font-bold mb-2">Kelas 11</h3>
+                        <p class="text-gray-600 mb-4">Listrik & Magnetisme</p>
+                        <div class="bg-green-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Materi Tersedia</div>
+                            <div class="text-xl font-bold text-green-600">18 Topik</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: 12 Nov 2024</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="12">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">🌊</div>
+                        <h3 class="text-2xl font-bold mb-2">Kelas 12</h3>
+                        <p class="text-gray-600 mb-4">Gelombang & Fisika Modern</p>
+                        <div class="bg-purple-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Materi Tersedia</div>
+                            <div class="text-xl font-bold text-purple-600">12 Topik</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: 10 Nov 2024</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daftar Materi (Hidden by default) -->
+            <div id="daftar-materi" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="back-to-kelas" class="text-blue-600 hover:text-blue-800">← Kembali</button>
+                        <h3 class="text-2xl font-bold" id="kelas-title">Kelas 10 - Fisika Dasar</h3>
+                    </div>
+                    <button id="tambah-materi-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
+                        + Tambah Materi
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="p-6 border-b">
+                        <h4 class="text-lg font-semibold">Daftar Materi</h4>
+                    </div>
+                    <div id="materi-list" class="divide-y">
+                        <!-- Materi akan dimuat di sini -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Materi (Hidden by default) -->
+            <div id="detail-materi" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="back-to-materi" class="text-blue-600 hover:text-blue-800">← Kembali</button>
+                        <h3 class="text-2xl font-bold" id="materi-title">Judul Materi</h3>
+                    </div>
+                    <button id="edit-materi-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 hidden">
+                        ✏️ Edit Materi
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-2">Deskripsi</h4>
+                        <p class="text-gray-600" id="materi-description">Deskripsi materi akan ditampilkan di sini</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h5 class="font-semibold mb-4">Download Materi</h5>
+                            <div class="space-y-3" id="materi-downloads">
+                                <!-- Link download akan dimuat di sini -->
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold mb-4">Informasi Materi</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Kelas:</span>
+                                    <span class="font-semibold" id="materi-kelas-info">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Terakhir update:</span>
+                                    <span class="font-semibold" id="materi-tanggal-info">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span class="font-semibold text-green-600">Aktif</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Siswa Page -->
+        <div id="siswa-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Manajemen Siswa</h2>
+                <div class="flex space-x-4">
+                    <button id="import-excel-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                        📥 Import Excel
+                    </button>
+                    <button id="tambah-siswa-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
+                        + Tambah Siswa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Kelas -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex flex-wrap gap-4">
+                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white" data-kelas="all">Semua Kelas</button>
+                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="10-1">10-1</button>
+                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="10-2">10-2</button>
+                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="11-1">11-1</button>
+                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="11-2">11-2</button>
+                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="12-1">12-1</button>
+                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="12-2">12-2</button>
+                </div>
+            </div>
+
+            <!-- Daftar Siswa -->
+            <div class="bg-white rounded-xl shadow-lg">
+                <div class="p-6 border-b">
+                    <h4 class="text-lg font-semibold">Daftar Siswa</h4>
+                    <p class="text-sm text-gray-600" id="siswa-count-info">Menampilkan semua siswa</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="siswa-table-body" class="divide-y divide-gray-200">
+                            <!-- Data siswa akan dimuat di sini -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kehadiran Page -->
+        <div id="kehadiran-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Kehadiran Siswa</h2>
+                <div class="flex space-x-4">
+                    <select id="filter-kelas-kehadiran" class="border rounded-lg px-4 py-2">
+                        <option value="">Semua Kelas</option>
+                        <option value="10-1">10-1</option>
+                        <option value="10-2">10-2</option>
+                        <option value="11-1">11-1</option>
+                        <option value="11-2">11-2</option>
+                        <option value="12-1">12-1</option>
+                        <option value="12-2">12-2</option>
+                    </select>
+                    <button id="hadirkan-semua-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                        ✅ Hadirkan Semua
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="p-6 border-b">
+                            <h4 class="text-lg font-semibold">Daftar Kehadiran Hari Ini</h4>
+                            <p class="text-sm text-gray-600" id="tanggal-kehadiran"></p>
+                        </div>
+                        <div class="p-6">
+                            <div id="kehadiran-list" class="space-y-3">
+                                <!-- Daftar kehadiran akan dimuat di sini -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h4 class="text-lg font-semibold mb-4">Ringkasan Kehadiran</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Hadir</span>
+                                <span class="font-semibold text-green-600" id="total-hadir">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Sakit</span>
+                                <span class="font-semibold text-yellow-600" id="total-sakit">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Izin</span>
+                                <span class="font-semibold text-blue-600" id="total-izin">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Alpha</span>
+                                <span class="font-semibold text-red-600" id="total-alpha">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="kehadiran-siswa-view" class="bg-white rounded-xl shadow-lg p-6 hidden">
+                        <h4 class="text-lg font-semibold mb-4">Status Kehadiran Anda</h4>
+                        <div class="text-center">
+                            <div class="text-3xl mb-2">📊</div>
+                            <div class="text-2xl font-bold text-green-600 mb-1" id="persentase-hadir">95%</div>
+                            <div class="text-sm text-gray-600 mb-4">Tingkat Kehadiran</div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Hadir:</span>
+                                    <span class="font-semibold">38 hari</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Sakit:</span>
+                                    <span class="font-semibold">1 hari</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Izin:</span>
+                                    <span class="font-semibold">1 hari</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nilai Page -->
+        <div id="nilai-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Daftar Nilai</h2>
+                <div class="flex space-x-4">
+                    <select id="filter-kelas-nilai" class="border rounded-lg px-4 py-2">
+                        <option value="">Semua Kelas</option>
+                        <option value="10-1">10-1</option>
+                        <option value="10-2">10-2</option>
+                        <option value="11-1">11-1</option>
+                        <option value="11-2">11-2</option>
+                        <option value="12-1">12-1</option>
+                        <option value="12-2">12-2</option>
+                    </select>
+                    <select id="filter-jenis-nilai" class="border rounded-lg px-4 py-2">
+                        <option value="">Semua Jenis</option>
+                        <option value="uh1">Ujian Harian 1</option>
+                        <option value="uh2">Ujian Harian 2</option>
+                        <option value="uts">Ujian Tengah Semester</option>
+                        <option value="uas">Ujian Akhir Semester</option>
+                        <option value="tugas">Tugas Proyek</option>
+                    </select>
+                    <button id="upload-nilai-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
+                        📤 Upload Nilai
+                    </button>
+                </div>
+            </div>
+
+            <div id="nilai-guru-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="p-6 border-b">
+                        <h4 class="text-lg font-semibold">Tabel Nilai Siswa</h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nilai</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nilai-table-body" class="divide-y divide-gray-200">
+                                <!-- Data nilai akan dimuat di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="nilai-siswa-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h4 class="text-lg font-semibold mb-6">Nilai Anda</h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="font-semibold mb-4">Nilai Terbaru</h5>
+                            <div id="nilai-siswa-list" class="space-y-3">
+                                <!-- Nilai siswa akan dimuat di sini -->
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold mb-4">Grafik Perkembangan</h5>
+                            <div class="bg-gray-50 rounded-lg p-6 text-center">
+                                <div class="text-4xl mb-2">📈</div>
+                                <p class="text-gray-600">Grafik perkembangan nilai akan ditampilkan di sini</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jurnal Page -->
+        <div id="jurnal-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Jurnal Guru</h2>
+                <div class="flex space-x-4">
+                    <select id="filter-kelas-jurnal" class="border rounded-lg px-4 py-2">
+                        <option value="">Semua Kelas</option>
+                        <option value="10-1">10-1</option>
+                        <option value="10-2">10-2</option>
+                        <option value="11-1">11-1</option>
+                        <option value="11-2">11-2</option>
+                        <option value="12-1">12-1</option>
+                        <option value="12-2">12-2</option>
+                    </select>
+                    <button id="tambah-jurnal-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                        + Tambah Catatan
+                    </button>
+                </div>
+            </div>
+
+            <div id="jurnal-guru-view" class="hidden">
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold mb-4">Tulis Catatan Baru</h4>
+                            <form id="jurnal-form">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Catatan</label>
+                                    <input type="text" id="jurnal-judul" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan judul catatan...">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                                    <select id="jurnal-kelas" class="w-full border rounded-lg px-4 py-2">
+                                        <option value="10-1">10-1</option>
+                                        <option value="10-2">10-2</option>
+                                        <option value="11-1">11-1</option>
+                                        <option value="11-2">11-2</option>
+                                        <option value="12-1">12-1</option>
+                                        <option value="12-2">12-2</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Isi Catatan</label>
+                                    <textarea id="jurnal-isi" rows="6" class="w-full border rounded-lg px-4 py-2" placeholder="Tulis catatan pembelajaran, observasi siswa, atau hal penting lainnya..."></textarea>
+                                </div>
+                                <div class="flex space-x-4">
+                                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                        💾 Simpan Catatan
+                                    </button>
+                                    <button type="button" id="reset-jurnal" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
+                                        🔄 Reset
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h4 class="text-lg font-semibold mb-4">Riwayat Catatan</h4>
+                            <div id="jurnal-list" class="space-y-4">
+                                <!-- Riwayat jurnal akan dimuat di sini -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="jurnal-siswa-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                    <div class="text-6xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Akses Terbatas</h3>
+                    <p class="text-gray-600">Halaman jurnal guru hanya dapat diakses oleh guru. Siswa tidak memiliki akses ke fitur ini.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
+            <div class="mb-6">
+                <div class="flex bg-gray-100 rounded-lg p-1">
+                    <button id="guru-tab" class="flex-1 py-2 px-4 rounded-md bg-blue-600 text-white font-semibold">Guru</button>
+                    <button id="siswa-tab" class="flex-1 py-2 px-4 rounded-md text-gray-600">Siswa</button>
+                </div>
+            </div>
+            
+            <form id="loginForm">
+                <div id="guru-form">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="guru-email" class="w-full border rounded-lg px-4 py-2" placeholder="teguh@example.com">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="guru-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password">
+                    </div>
+                </div>
+                
+                <div id="siswa-form" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">NIS (Nomor Induk Siswa)</label>
+                        <input type="text" id="siswa-nis" class="w-full border rounded-lg px-4 py-2" placeholder="12345678">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="siswa-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password">
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold">
+                        Login
+                    </button>
+                    <button type="button" id="closeModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Excel Modal -->
+    <div id="importExcelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6">Import Data Siswa dari Excel</h3>
+            
+            <div class="mb-6">
+                <h4 class="font-semibold mb-2">Format Excel yang Diperlukan:</h4>
+                <div class="bg-gray-50 rounded-lg p-4 text-sm">
+                    <p class="mb-2">File Excel harus memiliki kolom:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>NIS</strong> (Nomor Induk Siswa)</li>
+                        <li><strong>Nama</strong> (Nama Lengkap Siswa)</li>
+                        <li><strong>Kelas</strong> (Format: 10-1, 10-2, 11-1, dst)</li>
+                        <li><strong>Email</strong> (Opsional)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="file-upload-area rounded-lg p-8 text-center mb-6" id="fileUploadArea">
+                <div class="text-4xl mb-4">📁</div>
+                <p class="text-gray-600 mb-4">Drag & drop file Excel di sini atau klik untuk browse</p>
+                <input type="file" id="excelFile" accept=".xlsx,.xls" class="hidden">
+                <button type="button" id="browseBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Pilih File
+                </button>
+            </div>
+
+            <div id="fileInfo" class="hidden mb-6">
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <p class="font-semibold text-blue-800">File yang dipilih:</p>
+                    <p class="text-blue-600" id="fileName"></p>
+                </div>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="button" id="processExcelBtn" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 font-semibold disabled:bg-gray-400" disabled>
+                    📥 Proses Import
+                </button>
+                <button type="button" id="closeImportModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tambah Siswa Modal -->
+    <div id="tambahSiswaModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6">Tambah Siswa Baru</h3>
+            <form id="tambahSiswaForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">NIS</label>
+                    <input type="text" id="siswa-nis-baru" class="w-full border rounded-lg px-4 py-2" placeholder="12345678" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" id="siswa-nama-baru" class="w-full border rounded-lg px-4 py-2" placeholder="Nama Siswa" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                    <select id="siswa-kelas-baru" class="w-full border rounded-lg px-4 py-2" required>
+                        <option value="">Pilih Kelas</option>
+                        <option value="10-1">10-1</option>
+                        <option value="10-2">10-2</option>
+                        <option value="11-1">11-1</option>
+                        <option value="11-2">11-2</option>
+                        <option value="12-1">12-1</option>
+                        <option value="12-2">12-2</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="siswa-email-baru" class="w-full border rounded-lg px-4 py-2" placeholder="email@siswa.com">
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 font-semibold">
+                        + Tambah Siswa
+                    </button>
+                    <button type="button" id="closeTambahSiswaModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Materi Modal -->
+    <div id="uploadMateriModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6">Upload Materi Pembelajaran</h3>
+            <form id="uploadMateriForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Materi</label>
+                    <input type="text" id="materi-judul-baru" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan judul materi" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                    <textarea id="materi-deskripsi-baru" rows="3" class="w-full border rounded-lg px-4 py-2" placeholder="Deskripsi materi pembelajaran"></textarea>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link PPT</label>
+                        <input type="url" id="materi-ppt-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Video</label>
+                        <input type="url" id="materi-video-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Latihan</label>
+                        <input type="url" id="materi-latihan-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Modul</label>
+                        <input type="url" id="materi-modul-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold">
+                        💾 Upload Materi
+                    </button>
+                    <button type="button" id="closeUploadMateriModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let currentPage = 'home';
+        let currentKelas = null;
+        let currentSiswaFilter = 'all';
+        let currentMateri = null;
+
+        // Sample data
+        const materiData = {
+            '10': [
+                { 
+                    id: 1, 
+                    judul: 'Kinematika Gerak Lurus', 
+                    deskripsi: 'Konsep dasar gerak lurus beraturan dan berubah beraturan', 
+                    tanggal: '2024-11-15',
+                    links: {
+                        ppt: 'https://example.com/ppt/kinematika.pptx',
+                        video: 'https://example.com/video/kinematika.mp4',
+                        latihan: 'https://example.com/latihan/kinematika.pdf',
+                        modul: 'https://example.com/modul/kinematika.pdf'
+                    }
+                },
+                { 
+                    id: 2, 
+                    judul: 'Hukum Newton', 
+                    deskripsi: 'Tiga hukum Newton tentang gerak', 
+                    tanggal: '2024-11-14',
+                    links: {
+                        ppt: 'https://example.com/ppt/newton.pptx',
+                        video: 'https://example.com/video/newton.mp4',
+                        latihan: 'https://example.com/latihan/newton.pdf',
+                        modul: 'https://example.com/modul/newton.pdf'
+                    }
+                },
+                { 
+                    id: 3, 
+                    judul: 'Latihan Soal Dinamika', 
+                    deskripsi: 'Kumpulan soal latihan tentang gaya dan gerak', 
+                    tanggal: '2024-11-13',
+                    links: {
+                        ppt: '',
+                        video: 'https://example.com/video/dinamika.mp4',
+                        latihan: 'https://example.com/latihan/dinamika.pdf',
+                        modul: 'https://example.com/modul/dinamika.pdf'
+                    }
+                }
+            ],
+            '11': [
+                { 
+                    id: 4, 
+                    judul: 'Listrik Statis', 
+                    deskripsi: 'Konsep muatan listrik dan hukum Coulomb', 
+                    tanggal: '2024-11-12',
+                    links: {
+                        ppt: 'https://example.com/ppt/listrik-statis.pptx',
+                        video: 'https://example.com/video/listrik-statis.mp4',
+                        latihan: 'https://example.com/latihan/listrik-statis.pdf',
+                        modul: 'https://example.com/modul/listrik-statis.pdf'
+                    }
+                },
+                { 
+                    id: 5, 
+                    judul: 'Rangkaian Listrik', 
+                    deskripsi: 'Analisis rangkaian seri dan paralel', 
+                    tanggal: '2024-11-11',
+                    links: {
+                        ppt: 'https://example.com/ppt/rangkaian.pptx',
+                        video: 'https://example.com/video/rangkaian.mp4',
+                        latihan: 'https://example.com/latihan/rangkaian.pdf',
+                        modul: 'https://example.com/modul/rangkaian.pdf'
+                    }
+                }
+            ],
+            '12': [
+                { 
+                    id: 6, 
+                    judul: 'Gelombang Elektromagnetik', 
+                    deskripsi: 'Sifat dan karakteristik gelombang EM', 
+                    tanggal: '2024-11-10',
+                    links: {
+                        ppt: 'https://example.com/ppt/gelombang-em.pptx',
+                        video: 'https://example.com/video/gelombang-em.mp4',
+                        latihan: 'https://example.com/latihan/gelombang-em.pdf',
+                        modul: 'https://example.com/modul/gelombang-em.pdf'
+                    }
+                },
+                { 
+                    id: 7, 
+                    judul: 'Fisika Kuantum', 
+                    deskripsi: 'Pengenalan konsep dasar fisika kuantum', 
+                    tanggal: '2024-11-09',
+                    links: {
+                        ppt: 'https://example.com/ppt/kuantum.pptx',
+                        video: 'https://example.com/video/kuantum.mp4',
+                        latihan: 'https://example.com/latihan/kuantum.pdf',
+                        modul: 'https://example.com/modul/kuantum.pdf'
+                    }
+                }
+            ]
+        };
+
+        let siswaData = [
+            { id: 1, nis: '12345678', nama: 'Ahmad Rizki', kelas: '10-1', email: 'ahmad@email.com', hadir: true },
+            { id: 2, nis: '12345679', nama: 'Siti Nurhaliza', kelas: '10-1', email: 'siti@email.com', hadir: true },
+            { id: 3, nis: '12345680', nama: 'Budi Santoso', kelas: '10-2', email: 'budi@email.com', hadir: false },
+            { id: 4, nis: '12345681', nama: 'Dewi Sartika', kelas: '11-1', email: 'dewi@email.com', hadir: true },
+            { id: 5, nis: '12345682', nama: 'Eko Prasetyo', kelas: '11-2', email: 'eko@email.com', hadir: true },
+            { id: 6, nis: '12345683', nama: 'Fitri Handayani', kelas: '12-1', email: 'fitri@email.com', hadir: true },
+            { id: 7, nis: '12345684', nama: 'Rizki Ahmad', kelas: '10-1', email: 'rizki@email.com', hadir: true },
+            { id: 8, nis: '12345685', nama: 'Maya Sari', kelas: '10-2', email: 'maya@email.com', hadir: true },
+            { id: 9, nis: '12345686', nama: 'Andi Pratama', kelas: '11-1', email: 'andi@email.com', hadir: false },
+            { id: 10, nis: '12345687', nama: 'Rina Susanti', kelas: '12-2', email: 'rina@email.com', hadir: true }
+        ];
+
+        const nilaiData = [
+            { id: 1, siswa: 'Ahmad Rizki', kelas: '10-1', nilai: 85, jenis: 'uh1', status: 'Sudah Dinilai' },
+            { id: 2, siswa: 'Siti Nurhaliza', kelas: '10-1', nilai: 92, jenis: 'uh1', status: 'Sudah Dinilai' },
+            { id: 3, siswa: 'Budi Santoso', kelas: '10-2', nilai: null, jenis: 'uh1', status: 'Belum Dinilai' },
+            { id: 4, siswa: 'Dewi Sartika', kelas: '11-1', nilai: 88, jenis: 'uts', status: 'Sudah Dinilai' }
+        ];
+
+        let jurnalData = [
+            { id: 1, judul: 'Pembelajaran Kinematika', kelas: '10-1', tanggal: '2024-11-15', isi: 'Siswa menunjukkan antusiasme tinggi dalam memahami konsep gerak lurus. Perlu penekanan lebih pada rumus GLBB.' },
+            { id: 2, judul: 'Evaluasi Pemahaman Hukum Newton', kelas: '10-1', tanggal: '2024-11-14', isi: 'Sebagian besar siswa masih kesulitan membedakan antara massa dan berat. Perlu latihan soal tambahan.' }
+        ];
+
+        // Utility functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageId + '-page').classList.remove('hidden');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-600');
+            });
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('border-blue-500', 'text-blue-600');
+            document.querySelector(`[data-page="${pageId}"]`).classList.remove('border-transparent', 'text-gray-600');
+            
+            currentPage = pageId;
+            updatePageContent();
+        }
+
+        function updatePageContent() {
+            if (currentUser) {
+                updateUserInterface();
+            }
+            
+            switch(currentPage) {
+                case 'kelas':
+                    loadKelasContent();
+                    break;
+                case 'siswa':
+                    loadSiswaContent();
+                    break;
+                case 'kehadiran':
+                    loadKehadiranContent();
+                    break;
+                case 'nilai':
+                    loadNilaiContent();
+                    break;
+                case 'jurnal':
+                    loadJurnalContent();
+                    break;
+            }
+        }
+
+        function updateUserInterface() {
+            const isGuru = currentUser && currentUser.role === 'guru';
+            
+            // Show/hide guru-only buttons
+            document.querySelectorAll('#tambah-materi-btn, #hadirkan-semua-btn, #upload-nilai-btn, #tambah-jurnal-btn, #tambah-siswa-btn, #import-excel-btn, #edit-materi-btn').forEach(btn => {
+                btn.classList.toggle('hidden', !isGuru);
+            });
+            
+            // Update role indicator
+            const roleIndicator = document.getElementById('user-role-indicator');
+            if (currentUser) {
+                roleIndicator.textContent = `Login sebagai: ${currentUser.role === 'guru' ? 'Guru' : 'Siswa'} - ${currentUser.nama}`;
+            }
+            
+            // Update login button
+            const loginBtn = document.getElementById('loginBtn');
+            if (currentUser) {
+                loginBtn.textContent = 'Logout';
+                loginBtn.onclick = logout;
+            } else {
+                loginBtn.textContent = 'Login';
+                loginBtn.onclick = () => document.getElementById('loginModal').classList.remove('hidden');
+            }
+        }
+
+        function loadKelasContent() {
+            const daftarMateri = document.getElementById('daftar-materi');
+            const detailMateri = document.getElementById('detail-materi');
+            
+            if (currentKelas && !currentMateri) {
+                daftarMateri.classList.remove('hidden');
+                detailMateri.classList.add('hidden');
+                loadMateriList();
+            } else if (currentMateri) {
+                daftarMateri.classList.add('hidden');
+                detailMateri.classList.remove('hidden');
+                loadMateriDetail();
+            } else {
+                daftarMateri.classList.add('hidden');
+                detailMateri.classList.add('hidden');
+            }
+        }
+
+        function loadMateriList() {
+            const materiList = document.getElementById('materi-list');
+            const materi = materiData[currentKelas] || [];
+            
+            materiList.innerHTML = materi.map(item => `
+                <div class="p-6 hover:bg-gray-50 cursor-pointer" onclick="showMateriDetail(${item.id})">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-2xl">📚</span>
+                                <h5 class="font-semibold text-lg">${item.judul}</h5>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Materi</span>
+                            </div>
+                            <p class="text-gray-600 mb-2">${item.deskripsi}</p>
+                            <p class="text-sm text-gray-500">Diupload: ${formatTanggal(item.tanggal)}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-blue-600">→</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showMateriDetail(materiId) {
+            currentMateri = materiId;
+            loadKelasContent();
+        }
+
+        function loadMateriDetail() {
+            const materi = materiData[currentKelas].find(m => m.id === currentMateri);
+            if (!materi) return;
+            
+            document.getElementById('materi-title').textContent = materi.judul;
+            document.getElementById('materi-description').textContent = materi.deskripsi;
+            document.getElementById('materi-kelas-info').textContent = `Kelas ${currentKelas}`;
+            document.getElementById('materi-tanggal-info').textContent = formatTanggal(materi.tanggal);
+            
+            const materiDownloads = document.getElementById('materi-downloads');
+            materiDownloads.innerHTML = `
+                ${materi.links.ppt ? `
+                    <a href="${materi.links.ppt}" target="_blank" class="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-red-600">📄</span>
+                            <span class="font-medium">Presentasi (PPT)</span>
+                        </div>
+                        <span class="text-red-600">📥</span>
+                    </a>
+                ` : ''}
+                ${materi.links.video ? `
+                    <a href="${materi.links.video}" target="_blank" class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-blue-600">🎥</span>
+                            <span class="font-medium">Video Pembelajaran</span>
+                        </div>
+                        <span class="text-blue-600">📥</span>
+                    </a>
+                ` : ''}
+                ${materi.links.latihan ? `
+                    <a href="${materi.links.latihan}" target="_blank" class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-600">✏️</span>
+                            <span class="font-medium">Latihan Soal</span>
+                        </div>
+                        <span class="text-green-600">📥</span>
+                    </a>
+                ` : ''}
+                ${materi.links.modul ? `
+                    <a href="${materi.links.modul}" target="_blank" class="flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-purple-600">📖</span>
+                            <span class="font-medium">Modul Pembelajaran</span>
+                        </div>
+                        <span class="text-purple-600">📥</span>
+                    </a>
+                ` : ''}
+            `;
+        }
+
+        function loadSiswaContent() {
+            loadSiswaTable();
+        }
+
+        function loadSiswaTable() {
+            const siswaTableBody = document.getElementById('siswa-table-body');
+            const siswaCountInfo = document.getElementById('siswa-count-info');
+            
+            let filteredSiswa = siswaData;
+            if (currentSiswaFilter !== 'all') {
+                filteredSiswa = siswaData.filter(siswa => siswa.kelas === currentSiswaFilter);
+            }
+            
+            siswaCountInfo.textContent = `Menampilkan ${filteredSiswa.length} siswa ${currentSiswaFilter === 'all' ? 'dari semua kelas' : 'dari kelas ' + currentSiswaFilter}`;
+            
+            siswaTableBody.innerHTML = filteredSiswa.map((siswa, index) => `
+                <tr>
+                    <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.nis}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.nama}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.kelas}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${siswa.email}</td>
+                    <td class="px-6 py-4 text-sm">
+                        ${currentUser && currentUser.role === 'guru' ? `
+                            <button class="text-red-600 hover:text-red-800" onclick="hapusSiswa(${siswa.id})">
+                                🗑️ Hapus
+                            </button>
+                        ` : '-'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadKehadiranContent() {
+            const tanggalKehadiran = document.getElementById('tanggal-kehadiran');
+            tanggalKehadiran.textContent = new Date().toLocaleDateString('id-ID', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            if (currentUser && currentUser.role === 'guru') {
+                document.getElementById('kehadiran-siswa-view').classList.add('hidden');
+                loadKehadiranGuru();
+            } else {
+                document.getElementById('kehadiran-siswa-view').classList.remove('hidden');
+                loadKehadiranSiswa();
+            }
+        }
+
+        function loadKehadiranGuru() {
+            const kehadiranList = document.getElementById('kehadiran-list');
+            const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
+            
+            let filteredSiswa = siswaData;
+            if (filterKelas) {
+                filteredSiswa = siswaData.filter(siswa => siswa.kelas === filterKelas);
+            }
+
+            kehadiranList.innerHTML = filteredSiswa.map(siswa => `
+                <div class="flex items-center justify-between p-4 border rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="font-semibold text-blue-600">${siswa.nama.charAt(0)}</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold">${siswa.nama}</div>
+                            <div class="text-sm text-gray-600">NIS: ${siswa.nis} | Kelas ${siswa.kelas}</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 rounded text-sm ${siswa.hadir ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}" 
+                                onclick="toggleKehadiran(${siswa.id}, 'hadir')">
+                            ✅ Hadir
+                        </button>
+                        <button class="px-3 py-1 rounded text-sm bg-yellow-100 text-yellow-800" 
+                                onclick="toggleKehadiran(${siswa.id}, 'sakit')">
+                            🤒 Sakit
+                        </button>
+                        <button class="px-3 py-1 rounded text-sm bg-blue-100 text-blue-800" 
+                                onclick="toggleKehadiran(${siswa.id}, 'izin')">
+                            📝 Izin
+                        </button>
+                        <button class="px-3 py-1 rounded text-sm bg-red-100 text-red-800" 
+                                onclick="toggleKehadiran(${siswa.id}, 'alpha')">
+                            ❌ Alpha
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateRingkasanKehadiran(filteredSiswa);
+        }
+
+        function loadKehadiranSiswa() {
+            const persentaseHadir = document.getElementById('persentase-hadir');
+            persentaseHadir.textContent = '95%';
+        }
+
+        function loadNilaiContent() {
+            if (currentUser && currentUser.role === 'guru') {
+                document.getElementById('nilai-guru-view').classList.remove('hidden');
+                document.getElementById('nilai-siswa-view').classList.add('hidden');
+                loadNilaiGuru();
+            } else {
+                document.getElementById('nilai-guru-view').classList.add('hidden');
+                document.getElementById('nilai-siswa-view').classList.remove('hidden');
+                loadNilaiSiswa();
+            }
+        }
+
+        function loadNilaiGuru() {
+            const nilaiTableBody = document.getElementById('nilai-table-body');
+            const filterKelas = document.getElementById('filter-kelas-nilai').value;
+            const filterJenis = document.getElementById('filter-jenis-nilai').value;
+            
+            let filteredNilai = nilaiData;
+            if (filterKelas) {
+                filteredNilai = filteredNilai.filter(nilai => nilai.kelas === filterKelas);
+            }
+            if (filterJenis) {
+                filteredNilai = filteredNilai.filter(nilai => nilai.jenis === filterJenis);
+            }
+
+            nilaiTableBody.innerHTML = filteredNilai.map((nilai, index) => `
+                <tr>
+                    <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${nilai.siswa}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${nilai.kelas}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ${nilai.nilai ? `<span class="font-semibold ${nilai.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">${nilai.nilai}</span>` : '-'}
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="px-2 py-1 rounded text-xs ${nilai.status === 'Sudah Dinilai' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${nilai.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        <button class="text-blue-600 hover:text-blue-800" onclick="editNilai(${nilai.id})">
+                            ✏️ Edit
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadNilaiSiswa() {
+            const nilaiSiswaList = document.getElementById('nilai-siswa-list');
+            const nilaiSiswa = [
+                { jenis: 'Ujian Harian 1', nilai: 85, tanggal: '2024-11-10' },
+                { jenis: 'Tugas Proyek', nilai: 92, tanggal: '2024-11-08' },
+                { jenis: 'Ujian Tengah Semester', nilai: 78, tanggal: '2024-11-05' }
+            ];
+
+            nilaiSiswaList.innerHTML = nilaiSiswa.map(nilai => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <div class="font-semibold">${nilai.jenis}</div>
+                        <div class="text-sm text-gray-600">${formatTanggal(nilai.tanggal)}</div>
+                    </div>
+                    <div class="text-xl font-bold ${nilai.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">
+                        ${nilai.nilai}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadJurnalContent() {
+            if (currentUser && currentUser.role === 'guru') {
+                document.getElementById('jurnal-guru-view').classList.remove('hidden');
+                document.getElementById('jurnal-siswa-view').classList.add('hidden');
+                loadJurnalGuru();
+            } else {
+                document.getElementById('jurnal-guru-view').classList.add('hidden');
+                document.getElementById('jurnal-siswa-view').classList.remove('hidden');
+            }
+        }
+
+        function loadJurnalGuru() {
+            const jurnalList = document.getElementById('jurnal-list');
+            const filterKelas = document.getElementById('filter-kelas-jurnal').value;
+            
+            let filteredJurnal = jurnalData;
+            if (filterKelas) {
+                filteredJurnal = jurnalData.filter(jurnal => jurnal.kelas === filterKelas);
+            }
+
+            jurnalList.innerHTML = filteredJurnal.map(jurnal => `
+                <div class="border rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h5 class="font-semibold">${jurnal.judul}</h5>
+                        <button class="text-red-600 hover:text-red-800 text-sm" onclick="hapusJurnal(${jurnal.id})">
+                            🗑️
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-2">
+                        Kelas ${jurnal.kelas} • ${formatTanggal(jurnal.tanggal)}
+                    </div>
+                    <p class="text-sm text-gray-700">${jurnal.isi.substring(0, 100)}...</p>
+                </div>
+            `).join('');
+        }
+
+        // Excel processing functions
+        function processExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    let successCount = 0;
+                    let errorCount = 0;
+                    const errors = [];
+                    
+                    jsonData.forEach((row, index) => {
+                        if (row.NIS && row.Nama && row.Kelas) {
+                            // Check if NIS already exists
+                            if (siswaData.find(s => s.nis === row.NIS.toString())) {
+                                errors.push(`Baris ${index + 2}: NIS ${row.NIS} sudah terdaftar`);
+                                errorCount++;
+                                return;
+                            }
+                            
+                            const newSiswa = {
+                                id: Date.now() + index,
+                                nis: row.NIS.toString(),
+                                nama: row.Nama,
+                                kelas: row.Kelas,
+                                email: row.Email || '',
+                                hadir: false
+                            };
+                            
+                            siswaData.push(newSiswa);
+                            successCount++;
+                        } else {
+                            errors.push(`Baris ${index + 2}: Data tidak lengkap (NIS, Nama, dan Kelas wajib diisi)`);
+                            errorCount++;
+                        }
+                    });
+                    
+                    // Show result
+                    let message = `Import selesai!\n\n`;
+                    message += `✅ Berhasil: ${successCount} siswa\n`;
+                    message += `❌ Gagal: ${errorCount} siswa\n\n`;
+                    
+                    if (errors.length > 0) {
+                        message += `Detail Error:\n${errors.slice(0, 5).join('\n')}`;
+                        if (errors.length > 5) {
+                            message += `\n... dan ${errors.length - 5} error lainnya`;
+                        }
+                    }
+                    
+                    alert(message);
+                    
+                    // Refresh table
+                    loadSiswaTable();
+                    
+                    // Close modal
+                    document.getElementById('importExcelModal').classList.add('hidden');
+                    document.getElementById('fileInfo').classList.add('hidden');
+                    document.getElementById('processExcelBtn').disabled = true;
+                    
+                } catch (error) {
+                    alert('Error processing file: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Helper functions
+        function formatTanggal(tanggal) {
+            return new Date(tanggal).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function updateRingkasanKehadiran(siswaList) {
+            const totalHadir = siswaList.filter(s => s.hadir).length;
+            const totalSakit = 0;
+            const totalIzin = 0;
+            const totalAlpha = siswaList.length - totalHadir;
+
+            document.getElementById('total-hadir').textContent = totalHadir;
+            document.getElementById('total-sakit').textContent = totalSakit;
+            document.getElementById('total-izin').textContent = totalIzin;
+            document.getElementById('total-alpha').textContent = totalAlpha;
+        }
+
+        // Event handlers
+        function toggleKehadiran(siswaId, status) {
+            const siswa = siswaData.find(s => s.id === siswaId);
+            if (siswa) {
+                siswa.hadir = status === 'hadir';
+                loadKehadiranContent();
+            }
+        }
+
+        function hapusSiswa(siswaId) {
+            if (confirm('Apakah Anda yakin ingin menghapus siswa ini?')) {
+                siswaData = siswaData.filter(s => s.id !== siswaId);
+                loadSiswaTable();
+            }
+        }
+
+        function editNilai(nilaiId) {
+            const nilai = prompt('Masukkan nilai baru (0-100):');
+            if (nilai !== null && !isNaN(nilai) && nilai >= 0 && nilai <= 100) {
+                const nilaiItem = nilaiData.find(n => n.id === nilaiId);
+                if (nilaiItem) {
+                    nilaiItem.nilai = parseInt(nilai);
+                    nilaiItem.status = 'Sudah Dinilai';
+                    loadNilaiGuru();
+                }
+            }
+        }
+
+        function hapusJurnal(jurnalId) {
+            if (confirm('Apakah Anda yakin ingin menghapus catatan ini?')) {
+                jurnalData = jurnalData.filter(j => j.id !== jurnalId);
+                loadJurnalGuru();
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            showPage('home');
+            updateUserInterface();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showPage(btn.dataset.page);
+                });
+            });
+
+            // Home page navigation cards
+            document.querySelectorAll('[data-navigate]').forEach(card => {
+                card.addEventListener('click', () => {
+                    showPage(card.dataset.navigate);
+                });
+            });
+
+            // Kelas cards
+            document.querySelectorAll('.kelas-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    currentKelas = card.dataset.kelas;
+                    currentMateri = null;
+                    document.getElementById('kelas-title').textContent = `Kelas ${currentKelas} - Fisika`;
+                    loadKelasContent();
+                });
+            });
+
+            // Back buttons
+            document.getElementById('back-to-kelas').addEventListener('click', () => {
+                currentMateri = null;
+                loadKelasContent();
+            });
+
+            document.getElementById('back-to-materi').addEventListener('click', () => {
+                currentMateri = null;
+                loadKelasContent();
+            });
+
+            // Kelas filter buttons
+            document.querySelectorAll('.kelas-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.kelas-filter-btn').forEach(b => {
+                        b.classList.remove('bg-blue-600', 'text-white');
+                        b.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    btn.classList.remove('bg-gray-200', 'text-gray-700');
+                    btn.classList.add('bg-blue-600', 'text-white');
+                    
+                    currentSiswaFilter = btn.dataset.kelas;
+                    loadSiswaTable();
+                });
+            });
+
+            // Login modal
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                document.getElementById('loginModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('loginModal').classList.add('hidden');
+            });
+
+            // Import Excel modal
+            document.getElementById('import-excel-btn').addEventListener('click', () => {
+                document.getElementById('importExcelModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeImportModal').addEventListener('click', () => {
+                document.getElementById('importExcelModal').classList.add('hidden');
+            });
+
+            // File upload handling
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const excelFile = document.getElementById('excelFile');
+            const browseBtn = document.getElementById('browseBtn');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const processExcelBtn = document.getElementById('processExcelBtn');
+
+            browseBtn.addEventListener('click', () => {
+                excelFile.click();
+            });
+
+            fileUploadArea.addEventListener('click', () => {
+                excelFile.click();
+            });
+
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            excelFile.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleFileSelect(file) {
+                if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                    file.type === 'application/vnd.ms-excel') {
+                    fileName.textContent = file.name;
+                    fileInfo.classList.remove('hidden');
+                    processExcelBtn.disabled = false;
+                    processExcelBtn.onclick = () => processExcelFile(file);
+                } else {
+                    alert('Harap pilih file Excel (.xlsx atau .xls)');
+                }
+            }
+
+            // Tambah siswa modal
+            document.getElementById('tambah-siswa-btn').addEventListener('click', () => {
+                document.getElementById('tambahSiswaModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeTambahSiswaModal').addEventListener('click', () => {
+                document.getElementById('tambahSiswaModal').classList.add('hidden');
+            });
+
+            // Tambah siswa form
+            document.getElementById('tambahSiswaForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const nis = document.getElementById('siswa-nis-baru').value;
+                const nama = document.getElementById('siswa-nama-baru').value;
+                const kelas = document.getElementById('siswa-kelas-baru').value;
+                const email = document.getElementById('siswa-email-baru').value;
+                
+                if (siswaData.find(s => s.nis === nis)) {
+                    alert('NIS sudah terdaftar!');
+                    return;
+                }
+                
+                const newSiswa = {
+                    id: Date.now(),
+                    nis: nis,
+                    nama: nama,
+                    kelas: kelas,
+                    email: email,
+                    hadir: false
+                };
+                
+                siswaData.push(newSiswa);
+                
+                document.getElementById('tambahSiswaModal').classList.add('hidden');
+                document.getElementById('tambahSiswaForm').reset();
+                loadSiswaTable();
+                alert('Siswa berhasil ditambahkan!');
+            });
+
+            // Tambah materi button
+            document.getElementById('tambah-materi-btn').addEventListener('click', () => {
+                document.getElementById('uploadMateriModal').classList.remove('hidden');
+            });
+
+            // Upload materi modal
+            document.getElementById('closeUploadMateriModal').addEventListener('click', () => {
+                document.getElementById('uploadMateriModal').classList.add('hidden');
+            });
+
+            // Upload materi form
+            document.getElementById('uploadMateriForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const judul = document.getElementById('materi-judul-baru').value;
+                const deskripsi = document.getElementById('materi-deskripsi-baru').value;
+                const ppt = document.getElementById('materi-ppt-baru').value;
+                const video = document.getElementById('materi-video-baru').value;
+                const latihan = document.getElementById('materi-latihan-baru').value;
+                const modul = document.getElementById('materi-modul-baru').value;
+                
+                const newMateri = {
+                    id: Date.now(),
+                    judul: judul,
+                    deskripsi: deskripsi,
+                    tanggal: new Date().toISOString().split('T')[0],
+                    links: {
+                        ppt: ppt,
+                        video: video,
+                        latihan: latihan,
+                        modul: modul
+                    }
+                };
+                
+                if (!materiData[currentKelas]) {
+                    materiData[currentKelas] = [];
+                }
+                materiData[currentKelas].unshift(newMateri);
+                
+                document.getElementById('uploadMateriModal').classList.add('hidden');
+                document.getElementById('uploadMateriForm').reset();
+                loadMateriList();
+                alert('Materi berhasil ditambahkan!');
+            });
+
+            // Login tabs
+            document.getElementById('guru-tab').addEventListener('click', () => {
+                document.getElementById('guru-tab').classList.add('bg-blue-600', 'text-white');
+                document.getElementById('guru-tab').classList.remove('text-gray-600');
+                document.getElementById('siswa-tab').classList.remove('bg-blue-600', 'text-white');
+                document.getElementById('siswa-tab').classList.add('text-gray-600');
+                document.getElementById('guru-form').classList.remove('hidden');
+                document.getElementById('siswa-form').classList.add('hidden');
+            });
+
+            document.getElementById('siswa-tab').addEventListener('click', () => {
+                document.getElementById('siswa-tab').classList.add('bg-blue-600', 'text-white');
+                document.getElementById('siswa-tab').classList.remove('text-gray-600');
+                document.getElementById('guru-tab').classList.remove('bg-blue-600', 'text-white');
+                document.getElementById('guru-tab').classList.add('text-gray-600');
+                document.getElementById('siswa-form').classList.remove('hidden');
+                document.getElementById('guru-form').classList.add('hidden');
+            });
+
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const isGuruTab = document.getElementById('guru-tab').classList.contains('bg-blue-600');
+                
+                if (isGuruTab) {
+                    const email = document.getElementById('guru-email').value;
+                    const password = document.getElementById('guru-password').value;
+                    
+                    if (email === 'teguh@example.com' && password === 'guru123') {
+                        currentUser = { role: 'guru', nama: 'Teguh Prasetyo', email: email };
+                        document.getElementById('loginModal').classList.add('hidden');
+                        updateUserInterface();
+                        alert('Login berhasil sebagai Guru!');
+                    } else {
+                        alert('Email atau password salah!');
+                    }
+                } else {
+                    const nis = document.getElementById('siswa-nis').value;
+                    const password = document.getElementById('siswa-password').value;
+                    
+                    const siswa = siswaData.find(s => s.nis === nis);
+                    if (siswa && password === 'siswa123') {
+                        currentUser = { role: 'siswa', nama: siswa.nama, nis: nis };
+                        document.getElementById('loginModal').classList.add('hidden');
+                        updateUserInterface();
+                        alert(`Login berhasil sebagai ${siswa.nama}!`);
+                    } else {
+                        alert('NIS atau password salah!');
+                    }
+                }
+            });
+
+            // Filter handlers
+            document.getElementById('filter-kelas-kehadiran').addEventListener('change', loadKehadiranContent);
+            document.getElementById('filter-kelas-nilai').addEventListener('change', loadNilaiContent);
+            document.getElementById('filter-jenis-nilai').addEventListener('change', loadNilaiContent);
+            document.getElementById('filter-kelas-jurnal').addEventListener('change', loadJurnalContent);
+
+            // Hadirkan semua button
+            document.getElementById('hadirkan-semua-btn').addEventListener('click', () => {
+                siswaData.forEach(siswa => siswa.hadir = true);
+                loadKehadiranContent();
+                alert('Semua siswa telah dihadirkan!');
+            });
+
+            // Upload nilai button
+            document.getElementById('upload-nilai-btn').addEventListener('click', () => {
+                alert('Fitur upload nilai akan membuka dialog untuk upload file Excel/CSV atau input manual.');
+            });
+
+            // Jurnal form
+            document.getElementById('jurnal-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const judul = document.getElementById('jurnal-judul').value;
+                const kelas = document.getElementById('jurnal-kelas').value;
+                const isi = document.getElementById('jurnal-isi').value;
+                
+                if (judul && isi) {
+                    const newJurnal = {
+                        id: Date.now(),
+                        judul: judul,
+                        kelas: kelas,
+                        tanggal: new Date().toISOString().split('T')[0],
+                        isi: isi
+                    };
+                    
+                    jurnalData.unshift(newJurnal);
+                    document.getElementById('jurnal-form').reset();
+                    loadJurnalGuru();
+                    alert('Catatan berhasil disimpan!');
+                }
+            });
+
+            document.getElementById('reset-jurnal').addEventListener('click', () => {
+                document.getElementById('jurnal-form').reset();
+            });
+
+            // Initialize
+            updateUserInterface();
+        });
+    </script>
+</body>
+</html>
