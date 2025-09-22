@@ -33,6 +33,31 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
+        .kehadiran-chart {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px 0;
+        }
+        .chart-bar {
+            width: 60px;
+            background: linear-gradient(to top, #4f46e5, #7c3aed);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .chart-bar:hover {
+            transform: translateY(-5px);
+        }
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -341,63 +366,88 @@
 
         <!-- Kehadiran Page -->
         <div id="kehadiran-page" class="page-content hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">Kehadiran Siswa</h2>
-                <div class="flex space-x-4">
-                    <select id="filter-kelas-kehadiran" class="border rounded-lg px-4 py-2">
-                        <option value="">Semua Kelas</option>
-                        <!-- Opsi kelas akan dimuat di sini -->
-                    </select>
-                    <button id="hadirkan-semua-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
-                        ✅ Hadirkan Semua
-                    </button>
+            <!-- Guru View -->
+            <div id="kehadiran-guru-view" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">Kehadiran Siswa</h2>
+                    <div class="flex space-x-4">
+                        <select id="filter-kelas-kehadiran" class="border rounded-lg px-4 py-2">
+                            <option value="">Semua Kelas</option>
+                            <!-- Opsi kelas akan dimuat di sini -->
+                        </select>
+                        <button id="hadirkan-semua-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                            ✅ Hadirkan Semua
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-lg">
+                            <div class="p-6 border-b">
+                                <h4 class="text-lg font-semibold">Daftar Kehadiran Hari Ini</h4>
+                                <p class="text-sm text-gray-600" id="tanggal-kehadiran"></p>
+                            </div>
+                            <div class="p-6">
+                                <div id="kehadiran-list" class="space-y-3">
+                                    <!-- Daftar kehadiran akan dimuat di sini -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold mb-4">Ringkasan Kehadiran</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Hadir</span>
+                                    <span class="font-semibold text-green-600" id="total-hadir">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Sakit</span>
+                                    <span class="font-semibold text-yellow-600" id="total-sakit">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Izin</span>
+                                    <span class="font-semibold text-blue-600" id="total-izin">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Alpha</span>
+                                    <span class="font-semibold text-red-600" id="total-alpha">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-xl shadow-lg">
-                        <div class="p-6 border-b">
-                            <h4 class="text-lg font-semibold">Daftar Kehadiran Hari Ini</h4>
-                            <p class="text-sm text-gray-600" id="tanggal-kehadiran"></p>
+            <!-- Siswa View -->
+            <div id="kehadiran-siswa-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-4xl text-green-600">✅</span>
                         </div>
-                        <div class="p-6">
-                            <div id="kehadiran-list" class="space-y-3">
-                                <!-- Daftar kehadiran akan dimuat di sini -->
-                            </div>
-                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Kehadiran Saya</h2>
+                        <p class="text-gray-600">Riwayat kehadiran pembelajaran</p>
+                    </div>
+
+                    <div id="kehadiran-siswa-content" class="max-w-4xl mx-auto">
+                        <!-- Kehadiran siswa akan dimuat di sini -->
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                        <h4 class="text-lg font-semibold mb-4">Ringkasan Kehadiran</h4>
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Hadir</span>
-                                <span class="font-semibold text-green-600" id="total-hadir">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Sakit</span>
-                                <span class="font-semibold text-yellow-600" id="total-sakit">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Izin</span>
-                                <span class="font-semibold text-blue-600" id="total-izin">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Alpha</span>
-                                <span class="font-semibold text-red-600" id="total-alpha">0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="kehadiran-siswa-view" class="bg-white rounded-xl shadow-lg p-6 hidden">
-                        <h4 class="text-lg font-semibold mb-4">Status Kehadiran Anda</h4>
-                        <div id="kehadiran-siswa-content">
-                            <!-- Kehadiran siswa akan dimuat di sini -->
-                        </div>
-                    </div>
+            <!-- Not Login View -->
+            <div id="kehadiran-not-login-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                    <div class="text-6xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Akses Terbatas</h3>
+                    <p class="text-gray-600 mb-6">Halaman kehadiran hanya dapat diakses oleh guru atau siswa yang sudah login.</p>
+                    <button onclick="document.getElementById('loginModal').classList.remove('hidden')" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Login sebagai Siswa
+                    </button>
                 </div>
             </div>
         </div>
@@ -838,13 +888,62 @@
                     document.getElementById('stat-total-siswa').textContent = siswaData.length || 0;
                     document.getElementById('stat-total-materi').textContent = materiData.length || 0;
                     
-                    // Calculate average attendance (simplified)
-                    document.getElementById('stat-kehadiran-rata').textContent = '92%';
+                    // Calculate real attendance percentage
+                    await calculateAttendancePercentage();
                 }
             } catch (error) {
                 console.error('Error loading home content:', error);
             } finally {
                 hideLoading();
+            }
+        }
+
+        async function calculateAttendancePercentage() {
+            try {
+                // Get all attendance records
+                const { data: kehadiran, error } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                if (kehadiran.length === 0) {
+                    document.getElementById('stat-kehadiran-rata').textContent = '0%';
+                    return;
+                }
+                
+                // Group by student
+                const studentAttendance = {};
+                kehadiran.forEach(record => {
+                    if (!studentAttendance[record.siswa_id]) {
+                        studentAttendance[record.siswa_id] = {
+                            total: 0,
+                            hadir: 0
+                        };
+                    }
+                    studentAttendance[record.siswa_id].total++;
+                    if (record.status === 'hadir') {
+                        studentAttendance[record.siswa_id].hadir++;
+                    }
+                });
+                
+                // Calculate average percentage
+                let totalPercentage = 0;
+                let studentCount = 0;
+                
+                for (const studentId in studentAttendance) {
+                    const attendance = studentAttendance[studentId];
+                    if (attendance.total > 0) {
+                        totalPercentage += (attendance.hadir / attendance.total) * 100;
+                        studentCount++;
+                    }
+                }
+                
+                const averagePercentage = studentCount > 0 ? Math.round(totalPercentage / studentCount) : 0;
+                document.getElementById('stat-kehadiran-rata').textContent = `${averagePercentage}%`;
+            } catch (error) {
+                console.error('Error calculating attendance percentage:', error);
+                document.getElementById('stat-kehadiran-rata').textContent = '0%';
             }
         }
 
@@ -1209,26 +1308,31 @@
         }
 
         async function loadKehadiranContent() {
-            await loadDaftarKelas();
-            await updateKelasFilterKehadiran();
-            
-            const tanggalKehadiran = document.getElementById('tanggal-kehadiran');
-            tanggalKehadiran.textContent = new Date().toLocaleDateString('id-ID', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
+            if (!currentUser) {
+                // Show not login view
+                document.getElementById('kehadiran-guru-view').classList.add('hidden');
+                document.getElementById('kehadiran-siswa-view').classList.add('hidden');
+                document.getElementById('kehadiran-not-login-view').classList.remove('hidden');
+                return;
+            }
 
-            if (currentUser && currentUser.role === 'guru') {
+            await loadDaftarKelas();
+            
+            if (currentUser.role === 'guru') {
+                // Show guru view
+                document.getElementById('kehadiran-guru-view').classList.remove('hidden');
                 document.getElementById('kehadiran-siswa-view').classList.add('hidden');
+                document.getElementById('kehadiran-not-login-view').classList.add('hidden');
+                
+                await updateKelasFilterKehadiran();
                 await loadKehadiranGuru();
-            } else if (currentUser && currentUser.role === 'siswa') {
-                document.getElementById('kehadiran-siswa-view').classList.remove('hidden');
-                await loadKehadiranSiswa();
             } else {
-                document.getElementById('kehadiran-siswa-view').classList.add('hidden');
-                await loadKehadiranGuru();
+                // Show siswa view
+                document.getElementById('kehadiran-guru-view').classList.add('hidden');
+                document.getElementById('kehadiran-siswa-view').classList.remove('hidden');
+                document.getElementById('kehadiran-not-login-view').classList.add('hidden');
+                
+                await loadKehadiranSiswa();
             }
         }
 
@@ -1327,7 +1431,7 @@
                 // Get student data
                 const { data: siswa, error: siswaError } = await supabaseClient
                     .from('siswa')
-                    .select('id')
+                    .select('*')
                     .eq('nis', currentUser.nis)
                     .single();
                 
@@ -1346,9 +1450,10 @@
                 
                 if (kehadiran.length === 0) {
                     kehadiranContent.innerHTML = `
-                        <div class="text-center py-8">
-                            <div class="text-4xl mb-4">📅</div>
-                            <p class="text-gray-600">Belum ada data kehadiran yang tercatat</p>
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-4">📅</div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Data Kehadiran</h3>
+                            <p class="text-gray-600">Data kehadiran Anda belum dicatat oleh guru.</p>
                         </div>
                     `;
                     return;
@@ -1362,54 +1467,150 @@
                 const totalKehadiran = kehadiran.length;
                 const persentaseHadir = Math.round((totalHadir / totalKehadiran) * 100);
                 
+                // Get last 30 days for chart
+                const last30Days = [];
+                const today = new Date();
+                for (let i = 29; i >= 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - i);
+                    last30Days.push(date.toISOString().split('T')[0]);
+                }
+                
+                // Create chart data
+                const chartData = last30Days.map(date => {
+                    const record = kehadiran.find(k => k.tanggal === date);
+                    return {
+                        date: date,
+                        status: record ? record.status : null
+                    };
+                });
+                
                 kehadiranContent.innerHTML = `
-                    <div class="text-center mb-6">
-                        <div class="text-4xl font-bold text-green-600 mb-2">${persentaseHadir}%</div>
-                        <div class="text-sm text-gray-600">Tingkat Kehadiran</div>
-                    </div>
-                    
-                    <div class="space-y-4 mb-6">
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-green-600">✅</span>
-                                <span>Hadir</span>
-                            </div>
-                            <span class="font-semibold">${totalHadir} hari</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-yellow-600">🤒</span>
-                                <span>Sakit</span>
-                            </div>
-                            <span class="font-semibold">${totalSakit} hari</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-blue-600">📝</span>
-                                <span>Izin</span>
-                            </div>
-                            <span class="font-semibold">${totalIzin} hari</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-red-600">❌</span>
-                                <span>Alpha</span>
-                            </div>
-                            <span class="font-semibold">${totalAlpha} hari</span>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t pt-4">
-                        <h5 class="font-semibold mb-3">Riwayat Kehadiran Terbaru</h5>
-                        <div class="space-y-2 max-h-40 overflow-y-auto">
-                            ${kehadiran.slice(0, 5).map(k => `
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-gray-600">${formatTanggal(k.tanggal)}</span>
-                                    <span class="px-2 py-1 rounded text-xs ${getKehadiranColor(k.status)}">
-                                        ${k.status.toUpperCase()}
-                                    </span>
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Left Column - Statistics -->
+                        <div>
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 mb-6">
+                                <div class="text-center">
+                                    <div class="text-5xl font-bold text-green-600 mb-2">${persentaseHadir}%</div>
+                                    <div class="text-sm text-green-700 font-medium">Tingkat Kehadiran</div>
                                 </div>
-                            `).join('')}
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <span class="text-green-600">✅</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Hadir</div>
+                                            <div class="text-sm text-gray-500">Jumlah kehadiran</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-green-600">${totalHadir}</div>
+                                </div>
+                                
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                            <span class="text-yellow-600">🤒</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Sakit</div>
+                                            <div class="text-sm text-gray-500">Jumlah ketidakhadiran</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-yellow-600">${totalSakit}</div>
+                                </div>
+                                
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span class="text-blue-600">📝</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Izin</div>
+                                            <div class="text-sm text-gray-500">Jumlah izin</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-blue-600">${totalIzin}</div>
+                                </div>
+                                
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                            <span class="text-red-600">❌</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Alpha</div>
+                                            <div class="text-sm text-gray-500">Tanpa keterangan</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-red-600">${totalAlpha}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column - Chart and Recent -->
+                        <div>
+                            <div class="bg-white border rounded-xl p-6 mb-6">
+                                <h3 class="font-semibold mb-4">Grafik Kehadiran 30 Hari Terakhir</h3>
+                                <div class="kehadiran-chart">
+                                    ${chartData.map((data, index) => {
+                                        if (index % 5 === 0) { // Show every 5th day label
+                                            const height = data.status === 'hadir' ? '80%' : 
+                                                           data.status === 'sakit' ? '60%' : 
+                                                           data.status === 'izin' ? '60%' : 
+                                                           data.status === 'alpha' ? '40%' : '20%';
+                                            const color = data.status === 'hadir' ? 'bg-green-500' :
+                                                         data.status === 'sakit' ? 'bg-yellow-500' :
+                                                         data.status === 'izin' ? 'bg-blue-500' :
+                                                         data.status === 'alpha' ? 'bg-red-500' : 'bg-gray-300';
+                                            return `
+                                                <div class="chart-bar ${color}" style="height: ${height}">
+                                                    <span class="chart-label">${new Date(data.date).getDate()}</span>
+                                                </div>
+                                            `;
+                                        }
+                                        return '';
+                                    }).join('')}
+                                </div>
+                                <div class="flex justify-center space-x-6 mt-8 text-xs">
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-green-500 rounded"></div>
+                                        <span>Hadir</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-yellow-500 rounded"></div>
+                                        <span>Sakit</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                                        <span>Izin</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-red-500 rounded"></div>
+                                        <span>Alpha</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white border rounded-xl p-6">
+                                <h3 class="font-semibold mb-4">Riwayat Kehadiran Terbaru</h3>
+                                <div class="space-y-3 max-h-64 overflow-y-auto">
+                                    ${kehadiran.slice(0, 10).map(k => `
+                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <div class="font-medium">${formatTanggal(k.tanggal)}</div>
+                                                <div class="text-sm text-gray-500">${getHari(k.tanggal)}</div>
+                                            </div>
+                                            <span class="px-3 py-1 rounded-full text-xs font-medium ${getKehadiranColor(k.status)}">
+                                                ${k.status.toUpperCase()}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1419,6 +1620,11 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        function getHari(tanggal) {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            return days[new Date(tanggal).getDay()];
         }
 
         function getKehadiranColor(status) {
