@@ -116,7 +116,7 @@
                 <h3 class="text-2xl font-bold mb-6">Statistik Pembelajaran</h3>
                 <div class="grid md:grid-cols-4 gap-6">
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-600 mb-2" id="stat-total-kelas">6</div>
+                        <div class="text-3xl font-bold text-blue-600 mb-2" id="stat-total-kelas">0</div>
                         <div class="text-gray-600">Total Kelas</div>
                     </div>
                     <div class="text-center">
@@ -142,45 +142,8 @@
                 <div id="user-role-indicator" class="text-sm text-gray-600"></div>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="10">
-                    <div class="text-center">
-                        <div class="text-5xl mb-4">🔬</div>
-                        <h3 class="text-2xl font-bold mb-2">Kelas 10</h3>
-                        <p class="text-gray-600 mb-4">Fisika Dasar & Mekanika</p>
-                        <div class="bg-blue-50 rounded-lg p-3">
-                            <div class="text-sm text-gray-600">Materi Tersedia</div>
-                            <div class="text-xl font-bold text-blue-600" id="materi-count-10">0</div>
-                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="11">
-                    <div class="text-center">
-                        <div class="text-5xl mb-4">⚡</div>
-                        <h3 class="text-2xl font-bold mb-2">Kelas 11</h3>
-                        <p class="text-gray-600 mb-4">Listrik & Magnetisme</p>
-                        <div class="bg-green-50 rounded-lg p-3">
-                            <div class="text-sm text-gray-600">Materi Tersedia</div>
-                            <div class="text-xl font-bold text-green-600" id="materi-count-11">0</div>
-                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="12">
-                    <div class="text-center">
-                        <div class="text-5xl mb-4">🌊</div>
-                        <h3 class="text-2xl font-bold mb-2">Kelas 12</h3>
-                        <p class="text-gray-600 mb-4">Gelombang & Fisika Modern</p>
-                        <div class="bg-purple-50 rounded-lg p-3">
-                            <div class="text-sm text-gray-600">Materi Tersedia</div>
-                            <div class="text-xl font-bold text-purple-600" id="materi-count-12">0</div>
-                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
-                        </div>
-                    </div>
-                </div>
+            <div id="kelas-cards-container" class="grid md:grid-cols-3 gap-6 mb-8">
+                <!-- Kelas cards akan dimuat dinamis di sini -->
             </div>
 
             <!-- Daftar Materi (Hidden by default) -->
@@ -188,7 +151,7 @@
                 <div class="flex justify-between items-center mb-6">
                     <div class="flex items-center space-x-4">
                         <button id="back-to-kelas" class="text-blue-600 hover:text-blue-800">← Kembali</button>
-                        <h3 class="text-2xl font-bold" id="kelas-title">Kelas 10 - Fisika Dasar</h3>
+                        <h3 class="text-2xl font-bold" id="kelas-title">Kelas - Fisika</h3>
                     </div>
                     <button id="tambah-materi-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
                         + Tambah Materi
@@ -268,14 +231,9 @@
 
             <!-- Filter Kelas -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div class="flex flex-wrap gap-4">
+                <div class="flex flex-wrap gap-4" id="kelas-filter-container">
                     <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white" data-kelas="all">Semua Kelas</button>
-                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="10-1">10-1</button>
-                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="10-2">10-2</button>
-                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="11-1">11-1</button>
-                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="11-2">11-2</button>
-                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="12-1">12-1</button>
-                    <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300" data-kelas="12-2">12-2</button>
+                    <!-- Filter kelas akan dimuat dinamis di sini -->
                 </div>
             </div>
 
@@ -312,12 +270,7 @@
                 <div class="flex space-x-4">
                     <select id="filter-kelas-kehadiran" class="border rounded-lg px-4 py-2">
                         <option value="">Semua Kelas</option>
-                        <option value="10-1">10-1</option>
-                        <option value="10-2">10-2</option>
-                        <option value="11-1">11-1</option>
-                        <option value="11-2">11-2</option>
-                        <option value="12-1">12-1</option>
-                        <option value="12-2">12-2</option>
+                        <!-- Opsi kelas akan dimuat dinamis di sini -->
                     </select>
                     <button id="hadirkan-semua-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
                         ✅ Hadirkan Semua
@@ -396,12 +349,7 @@
                 <div class="flex space-x-4">
                     <select id="filter-kelas-nilai" class="border rounded-lg px-4 py-2">
                         <option value="">Semua Kelas</option>
-                        <option value="10-1">10-1</option>
-                        <option value="10-2">10-2</option>
-                        <option value="11-1">11-1</option>
-                        <option value="11-2">11-2</option>
-                        <option value="12-1">12-1</option>
-                        <option value="12-2">12-2</option>
+                        <!-- Opsi kelas akan dimuat dinamis di sini -->
                     </select>
                     <select id="filter-jenis-nilai" class="border rounded-lg px-4 py-2">
                         <option value="">Semua Jenis</option>
@@ -471,12 +419,7 @@
                 <div class="flex space-x-4">
                     <select id="filter-kelas-jurnal" class="border rounded-lg px-4 py-2">
                         <option value="">Semua Kelas</option>
-                        <option value="10-1">10-1</option>
-                        <option value="10-2">10-2</option>
-                        <option value="11-1">11-1</option>
-                        <option value="11-2">11-2</option>
-                        <option value="12-1">12-1</option>
-                        <option value="12-2">12-2</option>
+                        <!-- Opsi kelas akan dimuat dinamis di sini -->
                     </select>
                     <button id="tambah-jurnal-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
                         + Tambah Catatan
@@ -497,12 +440,7 @@
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
                                     <select id="jurnal-kelas" class="w-full border rounded-lg px-4 py-2">
-                                        <option value="10-1">10-1</option>
-                                        <option value="10-2">10-2</option>
-                                        <option value="11-1">11-1</option>
-                                        <option value="11-2">11-2</option>
-                                        <option value="12-1">12-1</option>
-                                        <option value="12-2">12-2</option>
+                                        <!-- Opsi kelas akan dimuat dinamis di sini -->
                                     </select>
                                 </div>
                                 <div class="mb-4">
@@ -648,15 +586,8 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                    <select id="siswa-kelas-baru" class="w-full border rounded-lg px-4 py-2" required>
-                        <option value="">Pilih Kelas</option>
-                        <option value="10-1">10-1</option>
-                        <option value="10-2">10-2</option>
-                        <option value="11-1">11-1</option>
-                        <option value="11-2">11-2</option>
-                        <option value="12-1">12-1</option>
-                        <option value="12-2">12-2</option>
-                    </select>
+                    <input type="text" id="siswa-kelas-baru" class="w-full border rounded-lg px-4 py-2" placeholder="Contoh: 10-1, 10-2, 11-IPA, dll" required>
+                    <p class="text-xs text-gray-500 mt-1">Format: Angka-Teks (contoh: 10-1, 11-IPA, 12-MIPA)</p>
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -682,6 +613,12 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Judul Materi</label>
                     <input type="text" id="materi-judul-baru" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan judul materi" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                    <select id="materi-kelas-baru" class="w-full border rounded-lg px-4 py-2" required>
+                        <!-- Opsi kelas akan dimuat dinamis di sini -->
+                    </select>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
@@ -742,6 +679,7 @@
         let currentKelas = null;
         let currentSiswaFilter = 'all';
         let currentMateri = null;
+        let allKelasList = [];
 
         // Utility functions
         function showLoading() {
@@ -838,6 +776,14 @@
                     document.getElementById('stat-total-siswa').textContent = siswaData.length || 0;
                     document.getElementById('stat-total-materi').textContent = materiData.length || 0;
                     
+                    // Get unique classes count
+                    const { data: kelasData } = await supabaseClient
+                        .from('siswa')
+                        .select('kelas');
+                    
+                    const uniqueKelas = [...new Set(kelasData.map(item => item.kelas))];
+                    document.getElementById('stat-total-kelas').textContent = uniqueKelas.length;
+                    
                     // Calculate average attendance (simplified)
                     document.getElementById('stat-kehadiran-rata').textContent = '92%';
                 }
@@ -846,6 +792,234 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        async function loadAllKelas() {
+            try {
+                const { data: kelasData, error } = await supabaseClient
+                    .from('siswa')
+                    .select('kelas')
+                    .order('kelas');
+                
+                if (error) throw error;
+                
+                // Get unique classes
+                allKelasList = [...new Set(kelasData.map(item => item.kelas))];
+                return allKelasList;
+            } catch (error) {
+                console.error('Error loading all kelas:', error);
+                return [];
+            }
+        }
+
+        async function updateAllKelasFilters() {
+            const kelasList = await loadAllKelas();
+            
+            // Update kelas cards
+            updateKelasCards(kelasList);
+            
+            // Update siswa page filters
+            updateSiswaPageFilters(kelasList);
+            
+            // Update kehadiran page filters
+            updateKehadiranPageFilters(kelasList);
+            
+            // Update nilai page filters
+            updateNilaiPageFilters(kelasList);
+            
+            // Update jurnal page filters
+            updateJurnalPageFilters(kelasList);
+            
+            // Update upload materi modal
+            updateUploadMateriModal(kelasList);
+        }
+
+        function updateKelasCards(kelasList) {
+            const container = document.getElementById('kelas-cards-container');
+            container.innerHTML = '';
+            
+            // Group by tingkat kelas (10, 11, 12, etc)
+            const groupedKelas = {};
+            kelasList.forEach(kelas => {
+                const tingkat = kelas.split('-')[0];
+                if (!groupedKelas[tingkat]) {
+                    groupedKelas[tingkat] = [];
+                }
+                groupedKelas[tingkat].push(kelas);
+            });
+            
+            // Create cards for each tingkat
+            Object.keys(groupedKelas).sort().forEach(tingkat => {
+                const kelasCount = groupedKelas[tingkat].length;
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card';
+                card.setAttribute('data-kelas', tingkat);
+                
+                const icons = {
+                    '10': '🔬',
+                    '11': '⚡',
+                    '12': '🌊'
+                };
+                
+                const titles = {
+                    '10': 'Kelas 10',
+                    '11': 'Kelas 11',
+                    '12': 'Kelas 12'
+                };
+                
+                const descriptions = {
+                    '10': 'Fisika Dasar & Mekanika',
+                    '11': 'Listrik & Magnetisme',
+                    '12': 'Gelombang & Fisika Modern'
+                };
+                
+                card.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">${icons[tingkat] || '📚'}</div>
+                        <h3 class="text-2xl font-bold mb-2">${titles[tingkat] || `Tingkat ${tingkat}`}</h3>
+                        <p class="text-gray-600 mb-4">${descriptions[tingkat] || 'Fisika'}</p>
+                        <div class="bg-blue-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Kelas Tersedia</div>
+                            <div class="text-xl font-bold text-blue-600" id="materi-count-${tingkat}">${kelasCount}</div>
+                            <div class="text-xs text-gray-500 mt-1">Total kelas: ${kelasCount}</div>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    currentKelas = tingkat;
+                    currentMateri = null;
+                    document.getElementById('kelas-title').textContent = `${titles[tingkat] || `Tingkat ${tingkat}`} - Fisika`;
+                    loadKelasContent();
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        function updateSiswaPageFilters(kelasList) {
+            const container = document.getElementById('kelas-filter-container');
+            
+            // Keep "Semua Kelas" button, remove others
+            const semuaBtn = container.querySelector('[data-kelas="all"]');
+            container.innerHTML = '';
+            container.appendChild(semuaBtn);
+            
+            // Add buttons for each class
+            kelasList.forEach(kelas => {
+                const button = document.createElement('button');
+                button.className = 'kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300';
+                button.setAttribute('data-kelas', kelas);
+                button.textContent = kelas;
+                
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.kelas-filter-btn').forEach(b => {
+                        b.classList.remove('bg-blue-600', 'text-white');
+                        b.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    button.classList.remove('bg-gray-200', 'text-gray-700');
+                    button.classList.add('bg-blue-600', 'text-white');
+                    
+                    currentSiswaFilter = kelas;
+                    loadSiswaTable();
+                });
+                
+                container.appendChild(button);
+            });
+        }
+
+        function updateKehadiranPageFilters(kelasList) {
+            const select = document.getElementById('filter-kelas-kehadiran');
+            const currentValue = select.value;
+            
+            // Keep "Semua Kelas" option, remove others
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Add options for each class
+            kelasList.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                select.appendChild(option);
+            });
+            
+            select.value = currentValue;
+        }
+
+        function updateNilaiPageFilters(kelasList) {
+            const select = document.getElementById('filter-kelas-nilai');
+            const currentValue = select.value;
+            
+            // Keep "Semua Kelas" option, remove others
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Add options for each class
+            kelasList.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                select.appendChild(option);
+            });
+            
+            select.value = currentValue;
+        }
+
+        function updateJurnalPageFilters(kelasList) {
+            // Update filter select
+            const filterSelect = document.getElementById('filter-kelas-jurnal');
+            const filterCurrentValue = filterSelect.value;
+            
+            while (filterSelect.children.length > 1) {
+                filterSelect.removeChild(filterSelect.lastChild);
+            }
+            
+            kelasList.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                filterSelect.appendChild(option);
+            });
+            
+            filterSelect.value = filterCurrentValue;
+            
+            // Update form select
+            const formSelect = document.getElementById('jurnal-kelas');
+            const formCurrentValue = formSelect.value;
+            
+            while (formSelect.children.length > 0) {
+                formSelect.removeChild(formSelect.firstChild);
+            }
+            
+            kelasList.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                formSelect.appendChild(option);
+            });
+            
+            formSelect.value = formCurrentValue;
+        }
+
+        function updateUploadMateriModal(kelasList) {
+            const select = document.getElementById('materi-kelas-baru');
+            const currentValue = select.value;
+            
+            while (select.children.length > 0) {
+                select.removeChild(selectSelect.firstChild);
+            }
+            
+            kelasList.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                select.appendChild(option);
+            });
+            
+            select.value = currentValue;
         }
 
         async function loadKelasContent() {
@@ -863,68 +1037,45 @@
             } else {
                 daftarMateri.classList.add('hidden');
                 detailMateri.classList.add('hidden');
-                await updateKelasStats();
-            }
-        }
-
-        async function updateKelasStats() {
-            showLoading();
-            try {
-                // Get materi count for each class
-                for (let kelas of ['10', '11', '12']) {
-                    const { data: materiList, error } = await supabaseClient
-                        .from('materi')
-                        .select('*')
-                        .eq('kelas', kelas);
-                    
-                    if (!error) {
-                        const countElement = document.getElementById(`materi-count-${kelas}`);
-                        if (countElement) {
-                            countElement.textContent = materiList.length || 0;
-                            
-                            // Update last update info
-                            const lastUpdate = materiList.length > 0 
-                                ? materiList.reduce((latest, materi) => 
-                                    new Date(materi.created_at) > new Date(latest.created_at) ? materi : latest
-                                ).created_at
-                                : null;
-                            
-                            const updateInfo = countElement.parentElement.querySelector('.text-xs');
-                            if (updateInfo) {
-                                updateInfo.textContent = lastUpdate 
-                                    ? `Terakhir update: ${formatTanggal(lastUpdate)}`
-                                    : 'Terakhir update: -';
-                            }
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error updating kelas stats:', error);
-            } finally {
-                hideLoading();
+                await updateAllKelasFilters();
             }
         }
 
         async function loadMateriList() {
             showLoading();
             try {
-                const { data: materi, error } = await supabaseClient
-                    .from('materi')
-                    .select('*')
-                    .eq('kelas', currentKelas)
-                    .order('created_at', { ascending: false });
+                // Get all classes for this tingkat
+                const { data: allSiswa } = await supabaseClient
+                    .from('siswa')
+                    .select('kelas')
+                    .like('kelas', `${currentKelas}-%`);
                 
-                if (error) throw error;
+                const kelasList = [...new Set(allSiswa.map(item => item.kelas))];
                 
-                const materiList = document.getElementById('materi-list');
-                materiList.innerHTML = materi.map(item => `
+                // Load materi for all classes in this tingkat
+                let materiList = [];
+                for (const kelas of kelasList) {
+                    const { data: materi, error } = await supabaseClient
+                        .from('materi')
+                        .select('*')
+                        .eq('kelas', kelas)
+                        .order('created_at', { ascending: false });
+                    
+                    if (!error) {
+                        materiList = materiList.concat(materi);
+                    }
+                }
+                
+                const materiContainer = document.getElementById('materi-list');
+                materiContainer.innerHTML = materiList.map(item => `
                     <div class="p-6 hover:bg-gray-50 cursor-pointer" onclick="showMateriDetail(${item.id})">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center space-x-2 mb-2">
                                     <span class="text-2xl">📚</span>
                                     <h5 class="font-semibold text-lg">${item.judul}</h5>
-                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Materi</span>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${item.kelas}</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Materi</span>
                                 </div>
                                 <p class="text-gray-600 mb-2">${item.deskripsi}</p>
                                 <p class="text-sm text-gray-500">Diupload: ${formatTanggal(item.created_at)}</p>
@@ -1012,6 +1163,7 @@
         }
 
         async function loadSiswaContent() {
+            await updateAllKelasFilters();
             await loadSiswaTable();
         }
 
@@ -1058,6 +1210,8 @@
         }
 
         async function loadKehadiranContent() {
+            await updateAllKelasFilters();
+            
             const tanggalKehadiran = document.getElementById('tanggal-kehadiran');
             tanggalKehadiran.textContent = new Date().toLocaleDateString('id-ID', { 
                 weekday: 'long', 
@@ -1210,6 +1364,8 @@
         }
 
         async function loadNilaiContent() {
+            await updateAllKelasFilters();
+            
             if (currentUser && currentUser.role === 'guru') {
                 document.getElementById('nilai-guru-view').classList.remove('hidden');
                 document.getElementById('nilai-siswa-view').classList.add('hidden');
@@ -1326,6 +1482,8 @@
         }
 
         async function loadJurnalContent() {
+            await updateAllKelasFilters();
+            
             if (currentUser && currentUser.role === 'guru') {
                 document.getElementById('jurnal-guru-view').classList.remove('hidden');
                 document.getElementById('jurnal-siswa-view').classList.add('hidden');
@@ -1390,11 +1548,19 @@
                     let successCount = 0;
                     let errorCount = 0;
                     const errors = [];
+                    const newKelas = new Set();
                     
                     for (let i = 0; i < jsonData.length; i++) {
                         const row = jsonData[i];
                         
                         if (row.NIS && row.Nama && row.Kelas) {
+                            // Validate kelas format
+                            if (!validateKelasFormat(row.Kelas.toString())) {
+                                errors.push(`Baris ${i + 2}: Format kelas "${row.Kelas}" tidak valid`);
+                                errorCount++;
+                                continue;
+                            }
+                            
                             // Check if NIS already exists
                             const { data: existingSiswa } = await supabaseClient
                                 .from('siswa')
@@ -1413,7 +1579,7 @@
                                 .insert([{
                                     nis: row.NIS.toString(),
                                     nama: row.Nama,
-                                    kelas: row.Kelas,
+                                    kelas: row.Kelas.toString(),
                                     email: row.Email || null
                                 }]);
                             
@@ -1422,6 +1588,7 @@
                                 errorCount++;
                             } else {
                                 successCount++;
+                                newKelas.add(row.Kelas.toString());
                             }
                         } else {
                             errors.push(`Baris ${i + 2}: Data tidak lengkap (NIS, Nama, dan Kelas wajib diisi)`);
@@ -1432,10 +1599,14 @@
                     // Show result
                     let message = `Import selesai!\n\n`;
                     message += `✅ Berhasil: ${successCount} siswa\n`;
-                    message += `❌ Gagal: ${errorCount} siswa\n\n`;
+                    message += `❌ Gagal: ${errorCount} siswa\n`;
+                    
+                    if (newKelas.size > 0) {
+                        message += `\n📚 Kelas baru ditambahkan: ${Array.from(newKelas).join(', ')}\n`;
+                    }
                     
                     if (errors.length > 0) {
-                        message += `Detail Error:\n${errors.slice(0, 5).join('\n')}`;
+                        message += `\nDetail Error:\n${errors.slice(0, 5).join('\n')}`;
                         if (errors.length > 5) {
                             message += `\n... dan ${errors.length - 5} error lainnya`;
                         }
@@ -1443,7 +1614,8 @@
                     
                     alert(message);
                     
-                    // Refresh table
+                    // Refresh table and filters
+                    await updateAllKelasFilters();
                     await loadSiswaTable();
                     
                     // Close modal
@@ -1468,6 +1640,12 @@
             });
         }
 
+        function validateKelasFormat(kelas) {
+            // Format yang diizinkan: angka-angka/huruf (contoh: 10-1, 11-IPA, 12-MIPA1)
+            const regex = /^\d{1,2}-[A-Za-z0-9]+$/;
+            return regex.test(kelas);
+        }
+
         // Event handlers
         async function hapusSiswa(siswaId) {
             if (!confirm('Apakah Anda yakin ingin menghapus siswa ini?')) return;
@@ -1481,6 +1659,7 @@
                 
                 if (error) throw error;
                 
+                await updateAllKelasFilters();
                 await loadSiswaTable();
                 alert('Siswa berhasil dihapus');
             } catch (error) {
@@ -1565,16 +1744,6 @@
                 });
             });
 
-            // Kelas cards
-            document.querySelectorAll('.kelas-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    currentKelas = card.dataset.kelas;
-                    currentMateri = null;
-                    document.getElementById('kelas-title').textContent = `Kelas ${currentKelas} - Fisika`;
-                    loadKelasContent();
-                });
-            });
-
             // Back buttons
             document.getElementById('back-to-kelas').addEventListener('click', () => {
                 currentMateri = null;
@@ -1584,21 +1753,6 @@
             document.getElementById('back-to-materi').addEventListener('click', () => {
                 currentMateri = null;
                 loadKelasContent();
-            });
-
-            // Kelas filter buttons
-            document.querySelectorAll('.kelas-filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.kelas-filter-btn').forEach(b => {
-                        b.classList.remove('bg-blue-600', 'text-white');
-                        b.classList.add('bg-gray-200', 'text-gray-700');
-                    });
-                    btn.classList.remove('bg-gray-200', 'text-gray-700');
-                    btn.classList.add('bg-blue-600', 'text-white');
-                    
-                    currentSiswaFilter = btn.dataset.kelas;
-                    loadSiswaTable();
-                });
             });
 
             // Login modal
@@ -1687,8 +1841,14 @@
                 
                 const nis = document.getElementById('siswa-nis-baru').value;
                 const nama = document.getElementById('siswa-nama-baru').value;
-                const kelas = document.getElementById('siswa-kelas-baru').value;
+                const kelas = document.getElementById('siswa-kelas-baru').value.trim();
                 const email = document.getElementById('siswa-email-baru').value;
+                
+                // Validasi format kelas
+                if (!validateKelasFormat(kelas)) {
+                    alert('Format kelas tidak valid! Gunakan format seperti: 10-1, 11-2, 12-IPA, dll.');
+                    return;
+                }
                 
                 showLoading();
                 try {
@@ -1717,6 +1877,7 @@
                     
                     document.getElementById('tambahSiswaModal').classList.add('hidden');
                     document.getElementById('tambahSiswaForm').reset();
+                    await updateAllKelasFilters();
                     await loadSiswaTable();
                     alert('Siswa berhasil ditambahkan!');
                 } catch (error) {
@@ -1729,6 +1890,8 @@
 
             // Tambah materi button
             document.getElementById('tambah-materi-btn').addEventListener('click', () => {
+                // Update kelas options before showing modal
+                updateUploadMateriModal(allKelasList);
                 document.getElementById('uploadMateriModal').classList.remove('hidden');
             });
 
@@ -1742,6 +1905,7 @@
                 e.preventDefault();
                 
                 const judul = document.getElementById('materi-judul-baru').value;
+                const kelas = document.getElementById('materi-kelas-baru').value;
                 const deskripsi = document.getElementById('materi-deskripsi-baru').value;
                 const ppt = document.getElementById('materi-ppt-baru').value;
                 const video = document.getElementById('materi-video-baru').value;
@@ -1753,7 +1917,7 @@
                     const { error } = await supabaseClient
                         .from('materi')
                         .insert([{
-                            kelas: currentKelas,
+                            kelas: kelas,
                             judul: judul,
                             deskripsi: deskripsi,
                             ppt_link: ppt || null,
