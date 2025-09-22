@@ -24,7 +24,6 @@
             border-color: #667eea;
             background-color: #ebf4ff;
         }
-        /* Tambahkan animasi untuk transisi halaman */
         .page-content {
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -32,7 +31,6 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Perbaiki tampilan mobile */
         @media (max-width: 768px) {
             .container { padding-left: 1rem; padding-right: 1rem; }
             table { font-size: 0.875rem; }
@@ -87,7 +85,7 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Main Content tetap sama -->
     <main class="container mx-auto px-4 py-8">
         <!-- Home Page tetap sama -->
         <div id="home-page" class="page-content">
@@ -147,7 +145,7 @@
             </div>
         </div>
 
-        <!-- Kelas Page -->
+        <!-- Kelas Page tetap sama -->
         <div id="kelas-page" class="page-content hidden">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-800">Pilih Kelas</h2>
@@ -207,7 +205,6 @@
                     </button>
                 </div>
 
-                <!-- Tambahkan fitur pencarian materi -->
                 <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
                     <div class="flex">
                         <input type="text" id="search-materi" placeholder="Cari materi..." class="flex-1 border rounded-l-lg px-4 py-2">
@@ -224,7 +221,6 @@
                     <div id="materi-list" class="divide-y">
                         <!-- Materi akan dimuat di sini -->
                     </div>
-                    <!-- Tambahkan pagination -->
                     <div id="materi-pagination" class="p-4 border-t flex justify-center">
                         <div class="flex space-x-2">
                             <button class="px-3 py-1 border rounded hover:bg-gray-100">←</button>
@@ -280,7 +276,6 @@
                         </div>
                     </div>
                     
-                    <!-- Tambahkan kolom komentar untuk siswa -->
                     <div id="materi-comments" class="mt-8">
                         <h5 class="font-semibold mb-4">Komentar & Pertanyaan</h5>
                         <div class="bg-gray-50 rounded-lg p-4 mb-4">
@@ -315,7 +310,7 @@
             </div>
         </div>
 
-        <!-- Siswa Page -->
+        <!-- Siswa Page tetap sama -->
         <div id="siswa-page" class="page-content hidden">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-800">Manajemen Siswa</h2>
@@ -329,7 +324,6 @@
                 </div>
             </div>
 
-            <!-- Filter Kelas -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                 <div class="flex flex-wrap gap-4">
                     <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white" data-kelas="all">Semua Kelas</button>
@@ -342,7 +336,6 @@
                 </div>
             </div>
 
-            <!-- Tambahkan fitur pencarian siswa -->
             <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
                 <div class="flex">
                     <input type="text" id="search-siswa" placeholder="Cari siswa berdasarkan nama atau NIS..." class="flex-1 border rounded-l-lg px-4 py-2">
@@ -352,7 +345,6 @@
                 </div>
             </div>
 
-            <!-- Daftar Siswa -->
             <div class="bg-white rounded-xl shadow-lg">
                 <div class="p-6 border-b">
                     <h4 class="text-lg font-semibold">Daftar Siswa</h4>
@@ -375,7 +367,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Tambahkan pagination -->
                 <div id="siswa-pagination" class="p-4 border-t flex justify-center">
                     <div class="flex space-x-2">
                         <button class="px-3 py-1 border rounded hover:bg-gray-100">←</button>
@@ -387,7 +378,7 @@
             </div>
         </div>
 
-        <!-- Kehadiran Page -->
+        <!-- Kehadiran Page tetap sama -->
         <div id="kehadiran-page" class="page-content hidden">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-800">Kehadiran Siswa</h2>
@@ -415,7 +406,6 @@
                             <p class="text-sm text-gray-600" id="tanggal-kehadiran"></p>
                         </div>
                         <div class="p-6">
-                            <!-- Tambahkan fitur pencarian -->
                             <div class="mb-4">
                                 <div class="flex">
                                     <input type="text" id="search-kehadiran" placeholder="Cari siswa..." class="flex-1 border rounded-l-lg px-4 py-2">
@@ -480,7 +470,7 @@
             </div>
         </div>
 
-        <!-- Nilai Page -->
+        <!-- Nilai Page tetap sama -->
         <div id="nilai-page" class="page-content hidden">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-800">Daftar Nilai</h2>
@@ -555,7 +545,7 @@
             </div>
         </div>
 
-        <!-- Jurnal Page -->
+        <!-- Jurnal Page tetap sama -->
         <div id="jurnal-page" class="page-content hidden">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-800">Jurnal Guru</h2>
@@ -615,7 +605,6 @@
                     <div>
                         <div class="bg-white rounded-xl shadow-lg p-6">
                             <h4 class="text-lg font-semibold mb-4">Riwayat Catatan</h4>
-                            <!-- Tambahkan fitur pencarian jurnal -->
                             <div class="mb-4">
                                 <div class="flex">
                                     <input type="text" id="search-jurnal" placeholder="Cari catatan..." class="flex-1 border rounded-l-lg px-4 py-2">
@@ -642,7 +631,7 @@
         </div>
     </main>
 
-    <!-- Login Modal -->
+    <!-- Login Modal - PERBAIKAN UTAMA -->
     <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
             <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
@@ -686,11 +675,12 @@
                 </div>
             </form>
             
-            <!-- Tambahkan informasi login -->
-            <div class="mt-6 text-center text-sm text-gray-600">
-                <p class="mb-2">Informasi Login:</p>
-                <p class="font-semibold">Guru: teguh@example.com / guru123</p>
-                <p class="font-semibold">Siswa: Gunakan NIS yang terdaftar / siswa123</p>
+            <!-- Informasi login -->
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 class="font-semibold text-blue-800 mb-2">Informasi Login:</h4>
+                <p class="text-sm text-blue-700 mb-1"><strong>Guru:</strong> teguh@example.com / guru123</p>
+                <p class="text-sm text-blue-700"><strong>Siswa:</strong> Gunakan NIS yang terdaftar / siswa123</p>
+                <p class="text-xs text-blue-600 mt-2">Contoh NIS: 12345678, 12345679, 12345680, dst.</p>
             </div>
         </div>
     </div>
@@ -826,7 +816,7 @@
         </div>
     </div>
 
-    <!-- Tambahkan notifikasi -->
+    <!-- Notifikasi tetap sama -->
     <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20">
         <div class="flex items-center">
             <span id="notification-icon">✓</span>
@@ -842,7 +832,7 @@
         let currentSiswaFilter = 'all';
         let currentMateri = null;
 
-        // Sample data
+        // Sample data dengan password yang benar
         const materiData = {
             '10': [
                 { 
@@ -936,7 +926,7 @@
             ]
         };
 
-        // Data siswa dengan password untuk login
+        // Data siswa dengan password yang benar
         let siswaData = [
             { id: 1, nis: '12345678', nama: 'Ahmad Rizki', kelas: '10-1', email: 'ahmad@email.com', hadir: true, password: 'siswa123' },
             { id: 2, nis: '12345679', nama: 'Siti Nurhaliza', kelas: '10-1', email: 'siti@email.com', hadir: true, password: 'siswa123' },
@@ -1024,7 +1014,10 @@
                 loginBtn.onclick = logout;
             } else {
                 loginBtn.textContent = 'Login';
-                loginBtn.onclick = () => document.getElementById('loginModal').classList.remove('hidden');
+                loginBtn.onclick = () => {
+                    document.getElementById('loginModal').classList.remove('hidden');
+                    document.getElementById('loginModal').style.display = 'flex';
+                };
             }
         }
 
@@ -1565,22 +1558,26 @@
                 });
             });
 
-            // Login modal
+            // Login modal - PERBAIKAN UTAMA
             document.getElementById('loginBtn').addEventListener('click', () => {
                 document.getElementById('loginModal').classList.remove('hidden');
+                document.getElementById('loginModal').style.display = 'flex';
             });
 
             document.getElementById('closeModal').addEventListener('click', () => {
                 document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('loginModal').style.display = 'none';
             });
 
             // Import Excel modal
             document.getElementById('import-excel-btn').addEventListener('click', () => {
                 document.getElementById('importExcelModal').classList.remove('hidden');
+                document.getElementById('importExcelModal').style.display = 'flex';
             });
 
             document.getElementById('closeImportModal').addEventListener('click', () => {
                 document.getElementById('importExcelModal').classList.add('hidden');
+                document.getElementById('importExcelModal').style.display = 'none';
             });
 
             // File upload handling
@@ -1639,10 +1636,12 @@
             // Tambah siswa modal
             document.getElementById('tambah-siswa-btn').addEventListener('click', () => {
                 document.getElementById('tambahSiswaModal').classList.remove('hidden');
+                document.getElementById('tambahSiswaModal').style.display = 'flex';
             });
 
             document.getElementById('closeTambahSiswaModal').addEventListener('click', () => {
                 document.getElementById('tambahSiswaModal').classList.add('hidden');
+                document.getElementById('tambahSiswaModal').style.display = 'none';
             });
 
             // Tambah siswa form
@@ -1675,6 +1674,7 @@
                 localStorage.setItem('siswaData', JSON.stringify(siswaData));
                 
                 document.getElementById('tambahSiswaModal').classList.add('hidden');
+                document.getElementById('tambahSiswaModal').style.display = 'none';
                 document.getElementById('tambahSiswaForm').reset();
                 loadSiswaTable();
                 showNotification('Siswa berhasil ditambahkan!');
@@ -1683,11 +1683,13 @@
             // Tambah materi button
             document.getElementById('tambah-materi-btn').addEventListener('click', () => {
                 document.getElementById('uploadMateriModal').classList.remove('hidden');
+                document.getElementById('uploadMateriModal').style.display = 'flex';
             });
 
             // Upload materi modal
             document.getElementById('closeUploadMateriModal').addEventListener('click', () => {
                 document.getElementById('uploadMateriModal').classList.add('hidden');
+                document.getElementById('uploadMateriModal').style.display = 'none';
             });
 
             // Upload materi form
@@ -1723,6 +1725,7 @@
                 localStorage.setItem('materiData', JSON.stringify(materiData));
                 
                 document.getElementById('uploadMateriModal').classList.add('hidden');
+                document.getElementById('uploadMateriModal').style.display = 'none';
                 document.getElementById('uploadMateriForm').reset();
                 loadMateriList();
                 showNotification('Materi berhasil ditambahkan!');
@@ -1748,7 +1751,7 @@
             });
 
             // Login form - PERBAIKAN UTAMA
-            document.getElementById('loginForm').addEventListener('submit', (e) => {
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 const isGuruTab = document.getElementById('guru-tab').classList.contains('bg-blue-600');
@@ -1770,7 +1773,12 @@
                             nama: 'Teguh Prasetyo', 
                             email: email 
                         };
+                        
+                        // Tutup modal
                         document.getElementById('loginModal').classList.add('hidden');
+                        document.getElementById('loginModal').style.display = 'none';
+                        
+                        // Update UI
                         updateUserInterface();
                         showNotification('Login berhasil sebagai Guru!');
                         
@@ -1799,7 +1807,12 @@
                             nis: nis,
                             kelas: siswa.kelas
                         };
+                        
+                        // Tutup modal
                         document.getElementById('loginModal').classList.add('hidden');
+                        document.getElementById('loginModal').style.display = 'none';
+                        
+                        // Update UI
                         updateUserInterface();
                         showNotification(`Login berhasil sebagai ${siswa.nama}!`);
                         
@@ -1899,6 +1912,9 @@
 
             // Initialize
             updateUserInterface();
+            
+            // Debug: Tambahkan log untuk memeriksa apakah event listener terpasang
+            console.log("Aplikasi dimuat. Event listener untuk login seharusnya sudah terpasang.");
         });
     </script>
 </body>
