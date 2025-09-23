@@ -1,3 +1,2738 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pembelajaran Fisika - Guru Teguh Prasetyo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .file-upload-area {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            border-radius: 12px;
+            min-height: auto;
+        }
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #e0e7ff;
+        }
+        .kelas-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .kehadiran-chart {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px 0;
+        }
+        .chart-bar {
+            width: 60px;
+            background: linear-gradient(to top, #4f46e5, #7c3aed);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .chart-bar:hover {
+            transform: translateY(-5px);
+        }
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(5px);
+        }
+        .upload-preview {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                        <span class="text-2xl">⚛️</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Guru Teguh Prasetyo</h1>
+                        <p class="text-sm opacity-90">Pembelajaran Fisika Interaktif</p>
+                    </div>
+                </div>
+                <button id="loginBtn" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                    Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-8 overflow-x-auto">
+                <button class="nav-btn py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-semibold whitespace-nowrap" data-page="home">
+                    🏠 Beranda
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="kelas">
+                    📚 Kelas
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="siswa">
+                    👥 Siswa
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="kehadiran">
+                    ✅ Kehadiran
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="nilai">
+                    📊 Daftar Nilai
+                </button>
+                <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 whitespace-nowrap" data-page="jurnal">
+                    📝 Jurnal Guru
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Home Page -->
+        <div id="home-page" class="page-content">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Selamat Datang di Pembelajaran Fisika</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Platform pembelajaran interaktif untuk memudahkan proses belajar mengajar fisika dengan fitur lengkap manajemen kelas, nilai, dan kehadiran.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="kelas">
+                    <div class="text-4xl mb-4">📚</div>
+                    <h3 class="text-xl font-semibold mb-2">Kelas</h3>
+                    <p class="text-gray-600">Akses materi pembelajaran</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="siswa">
+                    <div class="text-4xl mb-4">👥</div>
+                    <h3 class="text-xl font-semibold mb-2">Siswa</h3>
+                    <p class="text-gray-600">Kelola data siswa</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="kehadiran">
+                    <div class="text-4xl mb-4">✅</div>
+                    <h3 class="text-xl font-semibold mb-2">Kehadiran</h3>
+                    <p class="text-gray-600">Pantau kehadiran siswa</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="nilai">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold mb-2">Nilai</h3>
+                    <p class="text-gray-600">Kelola nilai siswa</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" data-navigate="jurnal">
+                    <div class="text-4xl mb-4">📝</div>
+                    <h3 class="text-xl font-semibold mb-2">Jurnal</h3>
+                    <p class="text-gray-600">Catat kegiatan pembelajaran</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold mb-6">Statistik Pembelajaran</h3>
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="stat-card bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-blue-600 mb-2" id="stat-total-kelas">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Total Kelas</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-kelas-detail">Memuat...</div>
+                    </div>
+                    <div class="stat-card bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-green-600 mb-2" id="stat-total-materi">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Materi Tersedia</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-materi-detail">Memuat...</div>
+                    </div>
+                    <div class="stat-card bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2" id="stat-total-siswa">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Total Siswa</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-siswa-detail">Memuat...</div>
+                    </div>
+                    <div class="stat-card bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6 text-center">
+                        <div class="text-4xl font-bold text-yellow-600 mb-2" id="stat-kehadiran-rata">
+                            <div class="animate-pulse">...</div>
+                        </div>
+                        <div class="text-gray-700 font-medium">Kehadiran Rata-rata</div>
+                        <div class="text-xs text-gray-500 mt-1" id="stat-kehadiran-detail">Memuat...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kelas Page -->
+        <div id="kelas-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Pilih Kelas</h2>
+                <div id="user-role-indicator" class="text-sm text-gray-600"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="10">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">🔬</div>
+                        <h3 class="text-2xl font-bold mb-2">Kelas 10</h3>
+                        <p class="text-gray-600 mb-4">Fisika Dasar & Mekanika</p>
+                        <div class="bg-blue-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Materi Tersedia</div>
+                            <div class="text-xl font-bold text-blue-600" id="materi-count-10">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="11">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">⚡</div>
+                        <h3 class="text-2xl font-bold mb-2">Kelas 11</h3>
+                        <p class="text-gray-600 mb-4">Listrik & Magnetisme</p>
+                        <div class="bg-green-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Materi Tersedia</div>
+                            <div class="text-xl font-bold text-green-600" id="materi-count-11">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover cursor-pointer kelas-card" data-kelas="12">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">🌊</div>
+                        <h3 class="text-2xl font-bold mb-2">Kelas 12</h3>
+                        <p class="text-gray-600 mb-4">Gelombang & Fisika Modern</p>
+                        <div class="bg-purple-50 rounded-lg p-3">
+                            <div class="text-sm text-gray-600">Materi Tersedia</div>
+                            <div class="text-xl font-bold text-purple-600" id="materi-count-12">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Terakhir update: -</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daftar Materi (Hidden by default) -->
+            <div id="daftar-materi" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="back-to-kelas" class="text-blue-600 hover:text-blue-800">← Kembali</button>
+                        <h3 class="text-2xl font-bold" id="kelas-title">Kelas 10 - Fisika Dasar</h3>
+                    </div>
+                    <button id="tambah-materi-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
+                        + Tambah Materi
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="p-6 border-b">
+                        <h4 class="text-lg font-semibold">Daftar Materi</h4>
+                    </div>
+                    <div id="materi-list" class="divide-y">
+                        <!-- Materi akan dimuat di sini -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Materi (Hidden by default) -->
+            <div id="detail-materi" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="back-to-materi" class="text-blue-600 hover:text-blue-800">← Kembali</button>
+                        <h3 class="text-2xl font-bold" id="materi-title">Judul Materi</h3>
+                    </div>
+                    <button id="edit-materi-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 hidden">
+                        ✏️ Edit Materi
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-2">Deskripsi</h4>
+                        <p class="text-gray-600" id="materi-description">Deskripsi materi akan ditampilkan di sini</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h5 class="font-semibold mb-4">Download Materi</h5>
+                            <div class="space-y-3" id="materi-downloads">
+                                <!-- Link download akan dimuat di sini -->
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold mb-4">Informasi Materi</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Kelas:</span>
+                                    <span class="font-semibold" id="materi-kelas-info">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Terakhir update:</span>
+                                    <span class="font-semibold" id="materi-tanggal-info">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span class="font-semibold text-green-600">Aktif</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Siswa Page -->
+        <div id="siswa-page" class="page-content hidden">
+            <!-- Guru View -->
+            <div id="siswa-guru-view" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">Manajemen Siswa</h2>
+                    <div class="flex space-x-4">
+                        <button id="import-excel-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                            📥 Import Excel
+                        </button>
+                        <button id="tambah-siswa-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
+                            + Tambah Siswa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Kelas -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <div class="flex flex-wrap gap-4" id="kelas-filter-container">
+                        <button class="kelas-filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white" data-kelas="all">Semua Kelas</button>
+                        <!-- Filter kelas akan dimuat di sini -->
+                    </div>
+                </div>
+
+                <!-- Daftar Siswa -->
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="p-6 border-b">
+                        <h4 class="text-lg font-semibold">Daftar Siswa</h4>
+                        <p class="text-sm text-gray-600" id="siswa-count-info">Menampilkan semua siswa</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="siswa-table-body" class="divide-y divide-gray-200">
+                                <!-- Data siswa akan dimuat di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Siswa View -->
+            <div id="siswa-siswa-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-4xl text-blue-600">👤</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Profil Siswa</h2>
+                        <p class="text-gray-600">Informasi data diri Anda</p>
+                    </div>
+
+                    <div id="siswa-profile-content" class="max-w-2xl mx-auto">
+                        <!-- Profil siswa akan dimuat di sini -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Not Login View -->
+            <div id="siswa-not-login-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                    <div class="text-6xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Akses Terbatas</h3>
+                    <p class="text-gray-600 mb-6">Halaman data siswa hanya dapat diakses oleh guru atau siswa yang sudah login.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kehadiran Page -->
+        <div id="kehadiran-page" class="page-content hidden">
+            <!-- Guru View -->
+            <div id="kehadiran-guru-view" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">Kehadiran Siswa</h2>
+                    <div class="flex space-x-4">
+                        <select id="filter-kelas-kehadiran" class="border rounded-lg px-4 py-2">
+                            <option value="">Semua Kelas</option>
+                            <!-- Opsi kelas akan dimuat di sini -->
+                        </select>
+                        <button id="hadirkan-semua-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                            ✅ Hadirkan Semua
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-lg">
+                            <div class="p-6 border-b">
+                                <h4 class="text-lg font-semibold">Daftar Kehadiran Hari Ini</h4>
+                                <p class="text-sm text-gray-600" id="tanggal-kehadiran"></p>
+                            </div>
+                            <div class="p-6">
+                                <div id="kehadiran-list" class="space-y-3">
+                                    <!-- Daftar kehadiran akan dimuat di sini -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold mb-4">Ringkasan Kehadiran</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Hadir</span>
+                                    <span class="font-semibold text-green-600" id="total-hadir">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Sakit</span>
+                                    <span class="font-semibold text-yellow-600" id="total-sakit">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Izin</span>
+                                    <span class="font-semibold text-blue-600" id="total-izin">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Alpha</span>
+                                    <span class="font-semibold text-red-600" id="total-alpha">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Siswa View -->
+            <div id="kehadiran-siswa-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-4xl text-green-600">✅</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Kehadiran Saya</h2>
+                        <p class="text-gray-600">Riwayat kehadiran pembelajaran</p>
+                    </div>
+
+                    <div id="kehadiran-siswa-content" class="max-w-4xl mx-auto">
+                        <!-- Kehadiran siswa akan dimuat di sini -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Not Login View -->
+            <div id="kehadiran-not-login-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                    <div class="text-6xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Akses Terbatas</h3>
+                    <p class="text-gray-600 mb-6">Halaman kehadiran hanya dapat diakses oleh guru atau siswa yang sudah login.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nilai Page -->
+        <div id="nilai-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Daftar Nilai</h2>
+                <div class="flex space-x-4">
+                    <select id="filter-kelas-nilai" class="border rounded-lg px-4 py-2">
+                        <option value="">Semua Kelas</option>
+                        <!-- Opsi kelas akan dimuat di sini -->
+                    </select>
+                    <select id="filter-jenis-nilai" class="border rounded-lg px-4 py-2">
+                        <option value="">Semua Jenis</option>
+                        <option value="uh1">Ujian Harian 1</option>
+                        <option value="uh2">Ujian Harian 2</option>
+                        <option value="uts">Ujian Tengah Semester</option>
+                        <option value="uas">Ujian Akhir Semester</option>
+                        <option value="tugas">Tugas Proyek</option>
+                    </select>
+                    <button id="upload-nilai-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
+                        📤 Import Nilai
+                    </button>
+                </div>
+            </div>
+
+            <div id="nilai-guru-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="p-6 border-b">
+                        <h4 class="text-lg font-semibold">Tabel Nilai Siswa</h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nilai</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nilai-table-body" class="divide-y divide-gray-200">
+                                <!-- Data nilai akan dimuat di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="nilai-siswa-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h4 class="text-lg font-semibold mb-6">Nilai Anda</h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="font-semibold mb-4">Nilai Terbaru</h5>
+                            <div id="nilai-siswa-list" class="space-y-3">
+                                <!-- Nilai siswa akan dimuat di sini -->
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold mb-4">Grafik Perkembangan</h5>
+                            <div class="bg-gray-50 rounded-lg p-6 text-center">
+                                <div class="text-4xl mb-2">📈</div>
+                                <p class="text-gray-600">Grafik perkembangan nilai akan ditampilkan di sini</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jurnal Page -->
+        <div id="jurnal-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Jurnal Guru</h2>
+                <div class="flex space-x-4">
+                    <select id="filter-kelas-jurnal" class="border rounded-lg px-4 py-2">
+                        <option value="">Semua Kelas</option>
+                        <!-- Opsi kelas akan dimuat di sini -->
+                    </select>
+                    <button id="tambah-jurnal-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 hidden">
+                        + Tambah Catatan
+                    </button>
+                </div>
+            </div>
+
+            <div id="jurnal-guru-view" class="hidden">
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold mb-4">Tulis Catatan Baru</h4>
+                            <form id="jurnal-form">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Catatan</label>
+                                    <input type="text" id="jurnal-judul" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan judul catatan...">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                                    <select id="jurnal-kelas" class="w-full border rounded-lg px-4 py-2">
+                                        <!-- Opsi kelas akan dimuat di sini -->
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Isi Catatan</label>
+                                    <textarea id="jurnal-isi" rows="6" class="w-full border rounded-lg px-4 py-2" placeholder="Tulis catatan pembelajaran, observasi siswa, atau hal penting lainnya..."></textarea>
+                                </div>
+                                <div class="flex space-x-4">
+                                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                        💾 Simpan Catatan
+                                    </button>
+                                    <button type="button" id="reset-jurnal" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
+                                        🔄 Reset
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h4 class="text-lg font-semibold mb-4">Riwayat Catatan</h4>
+                            <div id="jurnal-list" class="space-y-4">
+                                <!-- Riwayat jurnal akan dimuat di sini -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="jurnal-siswa-view" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                    <div class="text-6xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Akses Terbatas</h3>
+                    <p class="text-gray-600">Halaman jurnal guru hanya dapat diakses oleh guru. Siswa tidak memiliki akses ke fitur ini.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
+            <div class="mb-6">
+                <div class="flex bg-gray-100 rounded-lg p-1">
+                    <button id="guru-tab" class="flex-1 py-2 px-4 rounded-md bg-blue-600 text-white font-semibold">Guru</button>
+                    <button id="siswa-tab" class="flex-1 py-2 px-4 rounded-md text-gray-600">Siswa</button>
+                </div>
+            </div>
+            
+            <form id="loginForm">
+                <div id="guru-form">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="guru-email" class="w-full border rounded-lg px-4 py-2" placeholder="teguh@example.com">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="guru-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password">
+                    </div>
+                </div>
+                
+                <div id="siswa-form" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">NIS (Nomor Induk Siswa)</label>
+                        <input type="text" id="siswa-nis" class="w-full border rounded-lg px-4 py-2" placeholder="12345678">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="siswa-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password">
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold">
+                        Login
+                    </button>
+                    <button type="button" id="closeModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Excel Modal -->
+    <div id="importExcelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6">Import Data Siswa dari Excel</h3>
+            
+            <div class="mb-6">
+                <h4 class="font-semibold mb-2">Format Excel yang Diperlukan:</h4>
+                <div class="bg-gray-50 rounded-lg p-4 text-sm">
+                    <p class="mb-2">File Excel harus memiliki kolom:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>NIS</strong> (Nomor Induk Siswa)</li>
+                        <li><strong>Nama</strong> (Nama Lengkap Siswa)</li>
+                        <li><strong>Kelas</strong> (Format: 10-1, 10-2, 11-1, dst)</li>
+                        <li><strong>Email</strong> (Opsional)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="file-upload-area rounded-lg p-8 text-center mb-6" id="fileUploadArea">
+                <div class="text-4xl mb-4">📁</div>
+                <p class="text-gray-600 mb-4">Drag & drop file Excel di sini atau klik untuk browse</p>
+                <input type="file" id="excelFile" accept=".xlsx,.xls" class="hidden">
+                <button type="button" id="browseBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Pilih File
+                </button>
+            </div>
+
+            <div id="fileInfo" class="hidden mb-6">
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <p class="font-semibold text-blue-800">File yang dipilih:</p>
+                    <p class="text-blue-600" id="fileName"></p>
+                </div>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="button" id="processExcelBtn" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 font-semibold disabled:bg-gray-400" disabled>
+                    📥 Proses Import
+                </button>
+                <button type="button" id="closeImportModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Nilai Modal (versi compact) -->
+    <div id="uploadNilaiModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold">Import Data Nilai</h3>
+                <div class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+                    Excel Format
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 mb-3">
+                    <h4 class="font-semibold text-sm mb-2 text-gray-800">Format File Excel:</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-white rounded p-2 text-center shadow-xs">
+                            <div class="text-lg mb-1">🆔</div>
+                            <div class="text-xs font-medium">NIS</div>
+                        </div>
+                        <div class="bg-white rounded p-2 text-center shadow-xs">
+                            <div class="text-lg mb-1">📝</div>
+                            <div class="text-xs font-medium">Jenis Nilai</div>
+                        </div>
+                        <div class="bg-white rounded p-2 text-center shadow-xs">
+                            <div class="text-lg mb-1">📊</div>
+                            <div class="text-xs font-medium">Nilai</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                    <div class="flex items-start">
+                        <span class="text-yellow-600 mr-2 text-sm">⚠️</span>
+                        <div class="text-xs text-yellow-800">
+                            <p class="font-semibold mb-1">Pastikan:</p>
+                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                <li>NIS siswa sudah terdaftar</li>
+                                <li>Jenis nilai: uh1, uh2, uts, uas, tugas</li>
+                                <li>Nilai angka 0-100</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-upload-area rounded-lg p-6 text-center mb-4" id="nilaiFileUploadArea">
+                <div class="upload-preview rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                    <span class="text-3xl">📊</span>
+                </div>
+                <p class="text-base font-medium text-gray-700 mb-1">Upload File Excel</p>
+                <p class="text-sm text-gray-500 mb-3">Drag & drop atau klik browse</p>
+                <input type="file" id="nilaiExcelFile" accept=".xlsx,.xls" class="hidden">
+                <button type="button" id="nilaiBrowseBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
+                    Pilih File
+                </button>
+            </div>
+
+            <div id="nilaiFileInfo" class="hidden mb-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div class="flex items-center">
+                        <span class="text-green-600 mr-2">✅</span>
+                        <div class="flex-1">
+                            <p class="font-semibold text-green-800 text-sm">File siap:</p>
+                            <p class="text-green-600 text-xs" id="nilaiFileName"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3">
+                <button type="button" id="processNilaiExcelBtn" class="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg hover:from-green-700 hover:to-green-800 font-semibold text-sm disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed" disabled>
+                    🚀 Import Nilai
+                </button>
+                <button type="button" id="closeUploadNilaiModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold text-sm">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tambah Siswa Modal -->
+    <div id="tambahSiswaModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6">Tambah Siswa Baru</h3>
+            <form id="tambahSiswaForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">NIS</label>
+                    <input type="text" id="siswa-nis-baru" class="w-full border rounded-lg px-4 py-2" placeholder="12345678" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" id="siswa-nama-baru" class="w-full border rounded-lg px-4 py-2" placeholder="Nama Siswa" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                    <div class="flex space-x-2">
+                        <select id="siswa-kelas-tingkat-baru" class="w-1/2 border rounded-lg px-4 py-2" required>
+                            <option value="">Pilih Tingkat</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                        <input type="text" id="siswa-kelas-jurusan-baru" class="w-1/2 border rounded-lg px-4 py-2" placeholder="Jurusan (contoh: IPA, IPS)" required>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Format: Tingkat-Jurusan (contoh: 10-IPA)</p>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="siswa-email-baru" class="w-full border rounded-lg px-4 py-2" placeholder="email@siswa.com">
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 font-semibold">
+                        + Tambah Siswa
+                    </button>
+                    <button type="button" id="closeTambahSiswaModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Materi Modal -->
+    <div id="uploadMateriModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6">Upload Materi Pembelajaran</h3>
+            <form id="uploadMateriForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Materi</label>
+                    <input type="text" id="materi-judul-baru" class="w-full border rounded-lg px-4 py-2" placeholder="Masukkan judul materi" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                    <textarea id="materi-deskripsi-baru" rows="3" class="w-full border rounded-lg px-4 py-2" placeholder="Deskripsi materi pembelajaran"></textarea>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link PPT</label>
+                        <input type="url" id="materi-ppt-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Video</label>
+                        <input type="url" id="materi-video-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Latihan</label>
+                        <input type="url" id="materi-latihan-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Modul</label>
+                        <input type="url" id="materi-modul-baru" class="w-full border rounded-lg px-4 py-2" placeholder="https://...">
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold">
+                        💾 Upload Materi
+                    </button>
+                    <button type="button" id="closeUploadMateriModal" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 font-semibold">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Memuat data...</p>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://tahzvvghvnhimjrwlazd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaHp2dmdodm5oaW1qcndsYXpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1MzkzNDUsImV4cCI6MjA3NDExNTM0NX0.UnXdclChG7BI8sX5dGpRdkyCnq37vCbYiVgqzXThla4';
+        
+        // Initialize Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Global state
+        let currentUser = null;
+        let currentPage = 'home';
+        let currentKelas = null;
+        let currentSiswaFilter = 'all';
+        let currentMateri = null;
+        let daftarKelas = [];
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('loadingIndicator').classList.add('flex');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingIndicator').classList.add('hidden');
+            document.getElementById('loadingIndicator').classList.remove('flex');
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageId + '-page').classList.remove('hidden');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-600');
+            });
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('border-blue-500', 'text-blue-600');
+            document.querySelector(`[data-page="${pageId}"]`).classList.remove('border-transparent', 'text-gray-600');
+            
+            currentPage = pageId;
+            updatePageContent();
+        }
+
+        function updatePageContent() {
+            if (currentUser) {
+                updateUserInterface();
+            }
+            
+            switch(currentPage) {
+                case 'home':
+                    loadHomeContent();
+                    break;
+                case 'kelas':
+                    loadKelasContent();
+                    break;
+                case 'siswa':
+                    loadSiswaContent();
+                    break;
+                case 'kehadiran':
+                    loadKehadiranContent();
+                    break;
+                case 'nilai':
+                    loadNilaiContent();
+                    break;
+                case 'jurnal':
+                    loadJurnalContent();
+                    break;
+            }
+        }
+
+        function updateUserInterface() {
+            const isGuru = currentUser && currentUser.role === 'guru';
+            
+            // Show/hide guru-only buttons
+            document.querySelectorAll('#tambah-materi-btn, #hadirkan-semua-btn, #upload-nilai-btn, #tambah-jurnal-btn, #tambah-siswa-btn, #import-excel-btn, #edit-materi-btn').forEach(btn => {
+                btn.classList.toggle('hidden', !isGuru);
+            });
+            
+            // Update role indicator
+            const roleIndicator = document.getElementById('user-role-indicator');
+            if (currentUser) {
+                roleIndicator.textContent = `Login sebagai: ${currentUser.role === 'guru' ? 'Guru' : 'Siswa'} - ${currentUser.nama}`;
+            }
+            
+            // Update login button
+            const loginBtn = document.getElementById('loginBtn');
+            if (currentUser) {
+                loginBtn.textContent = 'Logout';
+                loginBtn.onclick = logout;
+            } else {
+                loginBtn.textContent = 'Login';
+                loginBtn.onclick = () => document.getElementById('loginModal').classList.remove('hidden');
+            }
+        }
+
+        async function loadHomeContent() {
+            showLoading();
+            try {
+                // Load all statistics
+                await Promise.all([
+                    loadTotalKelas(),
+                    loadTotalMateri(),
+                    loadTotalSiswa(),
+                    loadAttendancePercentage()
+                ]);
+            } catch (error) {
+                console.error('Error loading home content:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadTotalKelas() {
+            try {
+                // Get unique classes from students
+                const { data: siswa, error } = await supabaseClient
+                    .from('siswa')
+                    .select('kelas');
+                
+                if (error) throw error;
+                
+                // Get unique classes
+                const kelasSet = new Set();
+                siswa.forEach(item => {
+                    if (item.kelas) kelasSet.add(item.kelas);
+                });
+                
+                const totalKelas = kelasSet.size;
+                document.getElementById('stat-total-kelas').textContent = totalKelas;
+                document.getElementById('stat-kelas-detail').textContent = `${totalKelas} kelas aktif`;
+            } catch (error) {
+                console.error('Error loading total kelas:', error);
+                document.getElementById('stat-total-kelas').textContent = '0';
+                document.getElementById('stat-kelas-detail').textContent = 'Error';
+            }
+        }
+
+        async function loadTotalMateri() {
+            try {
+                // Menggunakan metode count untuk mendapatkan jumlah materi
+                const { count, error } = await supabaseClient
+                    .from('materi')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) throw error;
+                
+                document.getElementById('stat-total-materi').textContent = count || 0;
+                document.getElementById('stat-materi-detail').textContent = `${count || 0} materi tersedia`;
+            } catch (error) {
+                console.error('Error loading total materi:', error);
+                document.getElementById('stat-total-materi').textContent = '0';
+                document.getElementById('stat-materi-detail').textContent = 'Error';
+            }
+        }
+
+        async function loadTotalSiswa() {
+            try {
+                // Menggunakan metode count untuk mendapatkan jumlah siswa
+                const { count, error } = await supabaseClient
+                    .from('siswa')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) throw error;
+                
+                document.getElementById('stat-total-siswa').textContent = count || 0;
+                document.getElementById('stat-siswa-detail').textContent = `${count || 0} siswa terdaftar`;
+            } catch (error) {
+                console.error('Error loading total siswa:', error);
+                document.getElementById('stat-total-siswa').textContent = '0';
+                document.getElementById('stat-siswa-detail').textContent = 'Error';
+            }
+        }
+        
+        async function loadAttendancePercentage() {
+            try {
+                // Get all attendance records
+                const { data: kehadiran, error } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                if (kehadiran.length === 0) {
+                    document.getElementById('stat-kehadiran-rata').textContent = '0%';
+                    document.getElementById('stat-kehadiran-detail').textContent = 'Belum ada data';
+                    return;
+                }
+                
+                // Group by student
+                const studentAttendance = {};
+                kehadiran.forEach(record => {
+                    if (!studentAttendance[record.siswa_id]) {
+                        studentAttendance[record.siswa_id] = {
+                            total: 0,
+                            hadir: 0
+                        };
+                    }
+                    studentAttendance[record.siswa_id].total++;
+                    if (record.status === 'hadir') {
+                        studentAttendance[record.siswa_id].hadir++;
+                    }
+                });
+                
+                // Calculate average percentage
+                let totalPercentage = 0;
+                let studentCount = 0;
+                
+                for (const studentId in studentAttendance) {
+                    const attendance = studentAttendance[studentId];
+                    if (attendance.total > 0) {
+                        totalPercentage += (attendance.hadir / attendance.total) * 100;
+                        studentCount++;
+                    }
+                }
+                
+                const averagePercentage = studentCount > 0 ? Math.round(totalPercentage / studentCount) : 0;
+                document.getElementById('stat-kehadiran-rata').textContent = `${averagePercentage}%`;
+                document.getElementById('stat-kehadiran-detail').textContent = `Rata-rata ${studentCount} siswa`;
+            } catch (error) {
+                console.error('Error calculating attendance percentage:', error);
+                document.getElementById('stat-kehadiran-rata').textContent = '0%';
+                document.getElementById('stat-kehadiran-detail').textContent = 'Error';
+            }
+        }
+
+        async function loadKelasContent() {
+            const daftarMateri = document.getElementById('daftar-materi');
+            const detailMateri = document.getElementById('detail-materi');
+            
+            if (currentKelas && !currentMateri) {
+                daftarMateri.classList.remove('hidden');
+                detailMateri.classList.add('hidden');
+                await loadMateriList();
+            } else if (currentMateri) {
+                daftarMateri.classList.add('hidden');
+                detailMateri.classList.remove('hidden');
+                await loadMateriDetail();
+            } else {
+                daftarMateri.classList.add('hidden');
+                detailMateri.classList.add('hidden');
+                await updateKelasStats();
+            }
+        }
+
+        async function updateKelasStats() {
+            showLoading();
+            try {
+                // Get materi count for each class
+                for (let kelas of ['10', '11', '12']) {
+                    const { data: materiList, error } = await supabaseClient
+                        .from('materi')
+                        .select('*')
+                        .eq('kelas', kelas);
+                    
+                    if (!error) {
+                        const countElement = document.getElementById(`materi-count-${kelas}`);
+                        if (countElement) {
+                            countElement.textContent = materiList.length || 0;
+                            
+                            // Update last update info
+                            const lastUpdate = materiList.length > 0 
+                                ? materiList.reduce((latest, materi) => 
+                                    new Date(materi.created_at) > new Date(latest.created_at) ? materi : latest
+                                ).created_at
+                                : null;
+                            
+                            const updateInfo = countElement.parentElement.querySelector('.text-xs');
+                            if (updateInfo) {
+                                updateInfo.textContent = lastUpdate 
+                                    ? `Terakhir update: ${formatTanggal(lastUpdate)}`
+                                    : 'Terakhir update: -';
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating kelas stats:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadMateriList() {
+            showLoading();
+            try {
+                const { data: materi, error } = await supabaseClient
+                    .from('materi')
+                    .select('*')
+                    .eq('kelas', currentKelas)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const materiList = document.getElementById('materi-list');
+                materiList.innerHTML = materi.map(item => `
+                    <div class="p-6 hover:bg-gray-50 cursor-pointer" onclick="showMateriDetail(${item.id})">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-2xl">📚</span>
+                                    <h5 class="font-semibold text-lg">${item.judul}</h5>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Materi</span>
+                                </div>
+                                <p class="text-gray-600 mb-2">${item.deskripsi}</p>
+                                <p class="text-sm text-gray-500">Diupload: ${formatTanggal(item.created_at)}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-blue-600">→</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading materi list:', error);
+                alert('Gagal memuat daftar materi');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showMateriDetail(materiId) {
+            currentMateri = materiId;
+            loadKelasContent();
+        }
+
+        async function loadMateriDetail() {
+            showLoading();
+            try {
+                const { data: materi, error } = await supabaseClient
+                    .from('materi')
+                    .select('*')
+                    .eq('id', currentMateri)
+                    .single();
+                
+                if (error) throw error;
+                
+                document.getElementById('materi-title').textContent = materi.judul;
+                document.getElementById('materi-description').textContent = materi.deskripsi;
+                document.getElementById('materi-kelas-info').textContent = `Kelas ${materi.kelas}`;
+                document.getElementById('materi-tanggal-info').textContent = formatTanggal(materi.created_at);
+                
+                const materiDownloads = document.getElementById('materi-downloads');
+                materiDownloads.innerHTML = `
+                    ${materi.ppt_link ? `
+                        <a href="${materi.ppt_link}" target="_blank" class="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-red-600">📄</span>
+                                <span class="font-medium">Presentasi (PPT)</span>
+                            </div>
+                            <span class="text-red-600">📥</span>
+                        </a>
+                    ` : ''}
+                    ${materi.video_link ? `
+                        <a href="${materi.video_link}" target="_blank" class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-blue-600">🎥</span>
+                                <span class="font-medium">Video Pembelajaran</span>
+                            </div>
+                            <span class="text-blue-600">📥</span>
+                        </a>
+                    ` : ''}
+                    ${materi.latihan_link ? `
+                        <a href="${materi.latihan_link}" target="_blank" class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-green-600">✏️</span>
+                                <span class="font-medium">Latihan Soal</span>
+                            </div>
+                            <span class="text-green-600">📥</span>
+                        </a>
+                    ` : ''}
+                    ${materi.modul_link ? `
+                        <a href="${materi.modul_link}" target="_blank" class="flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-purple-600">📖</span>
+                                <span class="font-medium">Modul Pembelajaran</span>
+                            </div>
+                            <span class="text-purple-600">📥</span>
+                        </a>
+                    ` : ''}
+                `;
+            } catch (error) {
+                console.error('Error loading materi detail:', error);
+                alert('Gagal memuat detail materi');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadSiswaContent() {
+            if (!currentUser) {
+                // Show not login view
+                document.getElementById('siswa-guru-view').classList.add('hidden');
+                document.getElementById('siswa-siswa-view').classList.add('hidden');
+                document.getElementById('siswa-not-login-view').classList.remove('hidden');
+                return;
+            }
+
+            if (currentUser.role === 'guru') {
+                // Show guru view
+                document.getElementById('siswa-guru-view').classList.remove('hidden');
+                document.getElementById('siswa-siswa-view').classList.add('hidden');
+                document.getElementById('siswa-not-login-view').classList.add('hidden');
+                
+                await loadDaftarKelas();
+                await updateKelasFilterSiswa();
+                await loadSiswaTable();
+            } else {
+                // Show siswa view
+                document.getElementById('siswa-guru-view').classList.add('hidden');
+                document.getElementById('siswa-siswa-view').classList.remove('hidden');
+                document.getElementById('siswa-not-login-view').classList.add('hidden');
+                
+                await loadSiswaProfile();
+            }
+        }
+
+        async function loadSiswaProfile() {
+            showLoading();
+            try {
+                const { data: siswa, error } = await supabaseClient
+                    .from('siswa')
+                    .select('*')
+                    .eq('nis', currentUser.nis)
+                    .single();
+                
+                if (error) throw error;
+                
+                const profileContent = document.getElementById('siswa-profile-content');
+                profileContent.innerHTML = `
+                    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Informasi Pribadi</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">NIS:</span>
+                                <span class="font-semibold">${siswa.nis}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Nama Lengkap:</span>
+                                <span class="font-semibold">${siswa.nama}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Kelas:</span>
+                                <span class="kelas-badge ${getKelasColor(siswa.kelas)}">${siswa.kelas}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Email:</span>
+                                <span class="font-semibold">${siswa.email || '-'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4">Akses Cepat</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="showPage('nilai')" class="bg-white p-4 rounded-lg text-center hover:shadow-md transition-shadow">
+                                <div class="text-2xl mb-2">📊</div>
+                                <div class="text-sm font-medium">Lihat Nilai</div>
+                            </button>
+                            <button onclick="showPage('kehadiran')" class="bg-white p-4 rounded-lg text-center hover:shadow-md transition-shadow">
+                                <div class="text-2xl mb-2">✅</div>
+                                <div class="text-sm font-medium">Kehadiran</div>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading siswa profile:', error);
+                alert('Gagal memuat profil siswa');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadDaftarKelas() {
+            showLoading();
+            try {
+                const { data: siswa, error } = await supabaseClient
+                    .from('siswa')
+                    .select('kelas');
+                
+                if (error) throw error;
+                
+                // Get unique classes
+                const kelasSet = new Set();
+                siswa.forEach(item => {
+                    if (item.kelas) kelasSet.add(item.kelas);
+                });
+                
+                daftarKelas = Array.from(kelasSet).sort();
+            } catch (error) {
+                console.error('Error loading daftar kelas:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function updateKelasFilterSiswa() {
+            const filterContainer = document.getElementById('kelas-filter-container');
+            
+            // Keep "Semua Kelas" button
+            const semuaKelasBtn = filterContainer.querySelector('[data-kelas="all"]');
+            filterContainer.innerHTML = '';
+            filterContainer.appendChild(semuaKelasBtn);
+            
+            // Add buttons for each class
+            daftarKelas.forEach(kelas => {
+                const btn = document.createElement('button');
+                btn.className = 'kelas-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300';
+                btn.setAttribute('data-kelas', kelas);
+                btn.textContent = kelas;
+                filterContainer.appendChild(btn);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('.kelas-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.kelas-filter-btn').forEach(b => {
+                        b.classList.remove('bg-blue-600', 'text-white');
+                        b.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    btn.classList.remove('bg-gray-200', 'text-gray-700');
+                    btn.classList.add('bg-blue-600', 'text-white');
+                    
+                    currentSiswaFilter = btn.dataset.kelas;
+                    loadSiswaTable();
+                });
+            });
+        }
+
+        async function loadSiswaTable() {
+            showLoading();
+            try {
+                let query = supabaseClient.from('siswa').select('*');
+                
+                if (currentSiswaFilter !== 'all') {
+                    query = query.eq('kelas', currentSiswaFilter);
+                }
+                
+                const { data: siswa, error } = await query.order('nama');
+                
+                if (error) throw error;
+                
+                const siswaTableBody = document.getElementById('siswa-table-body');
+                const siswaCountInfo = document.getElementById('siswa-count-info');
+                
+                siswaCountInfo.textContent = `Menampilkan ${siswa.length} siswa ${currentSiswaFilter === 'all' ? 'dari semua kelas' : 'dari kelas ' + currentSiswaFilter}`;
+                
+                siswaTableBody.innerHTML = siswa.map((item, index) => `
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.nis}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.nama}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            <span class="kelas-badge ${getKelasColor(item.kelas)}">${item.kelas}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.email || '-'}</td>
+                        <td class="px-6 py-4 text-sm">
+                            ${currentUser && currentUser.role === 'guru' ? `
+                                <button class="text-red-600 hover:text-red-800" onclick="hapusSiswa(${item.id})">
+                                    🗑️ Hapus
+                                </button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading siswa table:', error);
+                alert('Gagal memuat data siswa');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function getKelasColor(kelas) {
+            if (!kelas) return 'bg-gray-100 text-gray-800';
+            
+            const tingkat = kelas.split('-')[0];
+            switch(tingkat) {
+                case '10': return 'bg-blue-100 text-blue-800';
+                case '11': return 'bg-green-100 text-green-800';
+                case '12': return 'bg-purple-100 text-purple-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        async function loadKehadiranContent() {
+            if (!currentUser) {
+                // Show not login view
+                document.getElementById('kehadiran-guru-view').classList.add('hidden');
+                document.getElementById('kehadiran-siswa-view').classList.add('hidden');
+                document.getElementById('kehadiran-not-login-view').classList.remove('hidden');
+                return;
+            }
+
+            await loadDaftarKelas();
+            
+            if (currentUser.role === 'guru') {
+                // Show guru view
+                document.getElementById('kehadiran-guru-view').classList.remove('hidden');
+                document.getElementById('kehadiran-siswa-view').classList.add('hidden');
+                document.getElementById('kehadiran-not-login-view').classList.add('hidden');
+                
+                await updateKelasFilterKehadiran();
+                await loadKehadiranGuru();
+            } else {
+                // Show siswa view
+                document.getElementById('kehadiran-guru-view').classList.add('hidden');
+                document.getElementById('kehadiran-siswa-view').classList.remove('hidden');
+                document.getElementById('kehadiran-not-login-view').classList.add('hidden');
+                
+                await loadKehadiranSiswa();
+            }
+        }
+
+        async function updateKelasFilterKehadiran() {
+            const select = document.getElementById('filter-kelas-kehadiran');
+            
+            // Keep "Semua Kelas" option
+            select.innerHTML = '<option value="">Semua Kelas</option>';
+            
+            // Add options for each class
+            daftarKelas.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                select.appendChild(option);
+            });
+        }
+
+async function loadKehadiranGuru() {
+    showLoading();
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
+        
+        // Tampilkan tanggal kehadiran
+        const tanggalElement = document.getElementById('tanggal-kehadiran');
+        if (tanggalElement) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            tanggalElement.textContent = new Date().toLocaleDateString('id-ID', options);
+        }
+        
+        // Get all students
+        let siswaQuery = supabaseClient.from('siswa').select('*');
+        if (filterKelas) {
+            siswaQuery = siswaQuery.eq('kelas', filterKelas);
+        }
+        
+        const { data: siswa, error: siswaError } = await siswaQuery;
+        if (siswaError) throw siswaError;
+        
+        // Get today's attendance
+        const { data: kehadiran, error: kehadiranError } = await supabaseClient
+            .from('kehadiran')
+            .select('*')
+            .eq('tanggal', today);
+        
+        if (kehadiranError) throw kehadiranError;
+        
+        // Merge attendance data
+        const siswaWithKehadiran = siswa.map(s => {
+            const kehadiranSiswa = kehadiran.find(k => k.siswa_id === s.id);
+            return {
+                ...s,
+                status: kehadiranSiswa ? kehadiranSiswa.status : 'alpha'
+            };
+        });
+        
+        const kehadiranList = document.getElementById('kehadiran-list');
+        kehadiranList.innerHTML = siswaWithKehadiran.map(siswa => `
+            <div class="flex items-center justify-between p-4 border rounded-lg">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="font-semibold text-blue-600">${siswa.nama.charAt(0)}</span>
+                    </div>
+                    <div>
+                        <div class="font-semibold">${siswa.nama}</div>
+                        <div class="text-sm text-gray-600">NIS: ${siswa.nis} | <span class="kelas-badge ${getKelasColor(siswa.kelas)}">${siswa.kelas}</span></div>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'hadir' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}" 
+                            onclick="updateKehadiran(${siswa.id}, 'hadir')">
+                        ✅ Hadir
+                    </button>
+                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'sakit' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}" 
+                            onclick="updateKehadiran(${siswa.id}, 'sakit')">
+                        🤒 Sakit
+                    </button>
+                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'izin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}" 
+                            onclick="updateKehadiran(${siswa.id}, 'izin')">
+                        📝 Izin
+                    </button>
+                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'alpha' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'}" 
+                            onclick="updateKehadiran(${siswa.id}, 'alpha')">
+                        ❌ Alpha
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        updateRingkasanKehadiran(siswaWithKehadiran);
+    } catch (error) {
+        console.error('Error loading kehadiran guru:', error);
+        alert('Gagal memuat data kehadiran');
+    } finally {
+        hideLoading();
+    }
+}
+
+        async function loadKehadiranSiswa() {
+            showLoading();
+            try {
+                // Get student data
+                const { data: siswa, error: siswaError } = await supabaseClient
+                    .from('siswa')
+                    .select('*')
+                    .eq('nis', currentUser.nis)
+                    .single();
+                
+                if (siswaError) throw siswaError;
+                
+                // Get student's attendance records
+                const { data: kehadiran, error: kehadiranError } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*')
+                    .eq('siswa_id', siswa.id)
+                    .order('tanggal', { ascending: false });
+                
+                if (kehadiranError) throw kehadiranError;
+                
+                const kehadiranContent = document.getElementById('kehadiran-siswa-content');
+                
+                if (kehadiran.length === 0) {
+                    kehadiranContent.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-4">📅</div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum Ada Data Kehadiran</h3>
+                            <p class="text-gray-600">Data kehadiran Anda belum dicatat oleh guru.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Calculate statistics
+                const totalHadir = kehadiran.filter(k => k.status === 'hadir').length;
+                const totalSakit = kehadiran.filter(k => k.status === 'sakit').length;
+                const totalIzin = kehadiran.filter(k => k.status === 'izin').length;
+                const totalAlpha = kehadiran.filter(k => k.status === 'alpha').length;
+                const totalKehadiran = kehadiran.length;
+                const persentaseHadir = Math.round((totalHadir / totalKehadiran) * 100);
+                
+                // Get last 30 days for chart
+                const last30Days = [];
+                const today = new Date();
+                for (let i = 29; i >= 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - i);
+                    last30Days.push(date.toISOString().split('T')[0]);
+                }
+                
+                // Create chart data
+                const chartData = last30Days.map(date => {
+                    const record = kehadiran.find(k => k.tanggal === date);
+                    return {
+                        date: date,
+                        status: record ? record.status : null
+                    };
+                });
+                
+                kehadiranContent.innerHTML = `
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Left Column - Statistics -->
+                        <div>
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 mb-6">
+                                <div class="text-center">
+                                    <div class="text-5xl font-bold text-green-600 mb-2">${persentaseHadir}%</div>
+                                    <div class="text-sm text-green-700 font-medium">Tingkat Kehadiran</div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <span class="text-green-600">✅</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Hadir</div>
+                                            <div class="text-sm text-gray-500">Jumlah kehadiran</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-green-600">${totalHadir}</div>
+                                </div>
+                                
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                            <span class="text-yellow-600">🤒</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Sakit</div>
+                                            <div class="text-sm text-gray-500">Jumlah ketidakhadiran</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-yellow-600">${totalSakit}</div>
+                                </div>
+                                
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span class="text-blue-600">📝</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Izin</div>
+                                            <div class="text-sm text-gray-500">Jumlah izin</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-blue-600">${totalIzin}</div>
+                                </div>
+                                
+                                <div class="bg-white border rounded-lg p-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                            <span class="text-red-600">❌</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Alpha</div>
+                                            <div class="text-sm text-gray-500">Tanpa keterangan</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-red-600">${totalAlpha}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column - Chart and Recent -->
+                        <div>
+                            <div class="bg-white border rounded-xl p-6 mb-6">
+                                <h3 class="font-semibold mb-4">Grafik Kehadiran 30 Hari Terakhir</h3>
+                                <div class="kehadiran-chart">
+                                    ${chartData.map((data, index) => {
+                                        if (index % 5 === 0) { // Show every 5th day label
+                                            const height = data.status === 'hadir' ? '80%' : 
+                                                           data.status === 'sakit' ? '60%' : 
+                                                           data.status === 'izin' ? '60%' : 
+                                                           data.status === 'alpha' ? '40%' : '20%';
+                                            const color = data.status === 'hadir' ? 'bg-green-500' :
+                                                         data.status === 'sakit' ? 'bg-yellow-500' :
+                                                         data.status === 'izin' ? 'bg-blue-500' :
+                                                         data.status === 'alpha' ? 'bg-red-500' : 'bg-gray-300';
+                                            return `
+                                                <div class="chart-bar ${color}" style="height: ${height}">
+                                                    <span class="chart-label">${new Date(data.date).getDate()}</span>
+                                                </div>
+                                            `;
+                                        }
+                                        return '';
+                                    }).join('')}
+                                </div>
+                                <div class="flex justify-center space-x-6 mt-8 text-xs">
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-green-500 rounded"></div>
+                                        <span>Hadir</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-yellow-500 rounded"></div>
+                                        <span>Sakit</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                                        <span>Izin</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-red-500 rounded"></div>
+                                        <span>Alpha</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white border rounded-xl p-6">
+                                <h3 class="font-semibold mb-4">Riwayat Kehadiran Terbaru</h3>
+                                <div class="space-y-3 max-h-64 overflow-y-auto">
+                                    ${kehadiran.slice(0, 10).map(k => `
+                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <div class="font-medium">${formatTanggal(k.tanggal)}</div>
+                                                <div class="text-sm text-gray-500">${getHari(k.tanggal)}</div>
+                                            </div>
+                                            <span class="px-3 py-1 rounded-full text-xs font-medium ${getKehadiranColor(k.status)}">
+                                                ${k.status.toUpperCase()}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading kehadiran siswa:', error);
+                alert('Gagal memuat data kehadiran');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function getHari(tanggal) {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            return days[new Date(tanggal).getDay()];
+        }
+
+        function getKehadiranColor(status) {
+            switch(status) {
+                case 'hadir': return 'bg-green-100 text-green-800';
+                case 'sakit': return 'bg-yellow-100 text-yellow-800';
+                case 'izin': return 'bg-blue-100 text-blue-800';
+                case 'alpha': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function updateRingkasanKehadiran(siswaList) {
+            const totalHadir = siswaList.filter(s => s.status === 'hadir').length;
+            const totalSakit = siswaList.filter(s => s.status === 'sakit').length;
+            const totalIzin = siswaList.filter(s => s.status === 'izin').length;
+            const totalAlpha = siswaList.filter(s => s.status === 'alpha').length;
+
+            document.getElementById('total-hadir').textContent = totalHadir;
+            document.getElementById('total-sakit').textContent = totalSakit;
+            document.getElementById('total-izin').textContent = totalIzin;
+            document.getElementById('total-alpha').textContent = totalAlpha;
+        }
+
+        async function updateKehadiran(siswaId, status) {
+            showLoading();
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Check if attendance record exists
+                const { data: existingKehadiran } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*')
+                    .eq('siswa_id', siswaId)
+                    .eq('tanggal', today)
+                    .single();
+                
+                if (existingKehadiran) {
+                    // Update existing record
+                    const { error } = await supabaseClient
+                        .from('kehadiran')
+                        .update({ status: status })
+                        .eq('id', existingKehadiran.id);
+                    
+                    if (error) throw error;
+                } else {
+                    // Insert new record
+                    const { error } = await supabaseClient
+                        .from('kehadiran')
+                        .insert([{
+                            siswa_id: siswaId,
+                            tanggal: today,
+                            status: status
+                        }]);
+                    
+                    if (error) throw error;
+                }
+                
+                await loadKehadiranContent();
+            } catch (error) {
+                console.error('Error updating kehadiran:', error);
+                alert('Gagal update kehadiran');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadNilaiContent() {
+            await loadDaftarKelas();
+            await updateKelasFilterNilai();
+            
+            if (currentUser && currentUser.role === 'guru') {
+                document.getElementById('nilai-guru-view').classList.remove('hidden');
+                document.getElementById('nilai-siswa-view').classList.add('hidden');
+                await loadNilaiGuru();
+            } else {
+                document.getElementById('nilai-guru-view').classList.add('hidden');
+                document.getElementById('nilai-siswa-view').classList.remove('hidden');
+                await loadNilaiSiswa();
+            }
+        }
+
+        async function updateKelasFilterNilai() {
+            const select = document.getElementById('filter-kelas-nilai');
+            
+            // Keep "Semua Kelas" option
+            select.innerHTML = '<option value="">Semua Kelas</option>';
+            
+            // Add options for each class
+            daftarKelas.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                select.appendChild(option);
+            });
+        }
+
+        async function loadNilaiGuru() {
+            showLoading();
+            try {
+                const filterKelas = document.getElementById('filter-kelas-nilai').value;
+                const filterJenis = document.getElementById('filter-jenis-nilai').value;
+                
+                let query = supabaseClient
+                    .from('nilai')
+                    .select(`
+                        *,
+                        siswa (nama, kelas)
+                    `);
+                
+                if (filterKelas) {
+                    query = query.eq('siswa.kelas', filterKelas);
+                }
+                
+                if (filterJenis) {
+                    query = query.eq('jenis', filterJenis);
+                }
+                
+                const { data: nilai, error } = await query;
+                
+                if (error) throw error;
+                
+                const nilaiTableBody = document.getElementById('nilai-table-body');
+                nilaiTableBody.innerHTML = nilai.map((item, index) => `
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${item.siswa.nama}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            <span class="kelas-badge ${getKelasColor(item.siswa.kelas)}">${item.siswa.kelas}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            ${item.nilai ? `<span class="font-semibold ${item.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">${item.nilai}</span>` : '-'}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="px-2 py-1 rounded text-xs ${item.status === 'Sudah Dinilai' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <button class="text-blue-600 hover:text-blue-800" onclick="editNilai(${item.id})">
+                                ✏️ Edit
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading nilai guru:', error);
+                alert('Gagal memuat data nilai');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadNilaiSiswa() {
+            const nilaiSiswaList = document.getElementById('nilai-siswa-list');
+            
+            if (!currentUser || currentUser.role !== 'siswa') {
+                nilaiSiswaList.innerHTML = '<p class="text-gray-500">Silakan login sebagai siswa untuk melihat nilai</p>';
+                return;
+            }
+            
+            try {
+                // Get student data
+                const { data: siswa, error: siswaError } = await supabaseClient
+                    .from('siswa')
+                    .select('id')
+                    .eq('nis', currentUser.nis)
+                    .single();
+                
+                if (siswaError) throw siswaError;
+                
+                // Get student's grades
+                const { data: nilai, error: nilaiError } = await supabaseClient
+                    .from('nilai')
+                    .select('*')
+                    .eq('siswa_id', siswa.id)
+                    .order('created_at', { ascending: false });
+                
+                if (nilaiError) throw nilaiError;
+                
+                if (nilai.length === 0) {
+                    nilaiSiswaList.innerHTML = '<p class="text-gray-500">Belum ada data nilai yang tersedia</p>';
+                    return;
+                }
+                
+                nilaiSiswaList.innerHTML = nilai.map(item => `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-semibold">${getJenisNilaiText(item.jenis)}</div>
+                            <div class="text-sm text-gray-600">${formatTanggal(item.created_at)}</div>
+                        </div>
+                        <div class="text-xl font-bold ${item.nilai >= 75 ? 'text-green-600' : 'text-red-600'}">
+                            ${item.nilai}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading nilai siswa:', error);
+                nilaiSiswaList.innerHTML = '<p class="text-red-500">Gagal memuat nilai</p>';
+            }
+        }
+
+        function getJenisNilaiText(jenis) {
+            switch(jenis) {
+                case 'uh1': return 'Ujian Harian 1';
+                case 'uh2': return 'Ujian Harian 2';
+                case 'uts': return 'Ujian Tengah Semester';
+                case 'uas': return 'Ujian Akhir Semester';
+                case 'tugas': return 'Tugas Proyek';
+                default: return jenis;
+            }
+        }
+
+        async function loadJurnalContent() {
+            await loadDaftarKelas();
+            await updateKelasFilterJurnal();
+            
+            if (currentUser && currentUser.role === 'guru') {
+                document.getElementById('jurnal-guru-view').classList.remove('hidden');
+                document.getElementById('jurnal-siswa-view').classList.add('hidden');
+                await loadJurnalGuru();
+            } else {
+                document.getElementById('jurnal-guru-view').classList.add('hidden');
+                document.getElementById('jurnal-siswa-view').classList.remove('hidden');
+            }
+        }
+
+        async function updateKelasFilterJurnal() {
+            const selectFilter = document.getElementById('filter-kelas-jurnal');
+            const selectForm = document.getElementById('jurnal-kelas');
+            
+            // Reset both selects
+            selectFilter.innerHTML = '<option value="">Semua Kelas</option>';
+            selectForm.innerHTML = '';
+            
+            // Add options for each class
+            daftarKelas.forEach(kelas => {
+                // For filter
+                const optionFilter = document.createElement('option');
+                optionFilter.value = kelas;
+                optionFilter.textContent = kelas;
+                selectFilter.appendChild(optionFilter);
+                
+                // For form
+                const optionForm = document.createElement('option');
+                optionForm.value = kelas;
+                optionForm.textContent = kelas;
+                selectForm.appendChild(optionForm);
+            });
+        }
+
+        async function loadJurnalGuru() {
+            showLoading();
+            try {
+                const filterKelas = document.getElementById('filter-kelas-jurnal').value;
+                
+                let query = supabaseClient
+                    .from('jurnal')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (filterKelas) {
+                    query = query.eq('kelas', filterKelas);
+                }
+                
+                const { data: jurnal, error } = await query;
+                
+                if (error) throw error;
+                
+                const jurnalList = document.getElementById('jurnal-list');
+                jurnalList.innerHTML = jurnal.map(item => `
+                    <div class="border rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h5 class="font-semibold">${item.judul}</h5>
+                            <button class="text-red-600 hover:text-red-800 text-sm" onclick="hapusJurnal(${item.id})">
+                                🗑️
+                            </button>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            <span class="kelas-badge ${getKelasColor(item.kelas)}">${item.kelas}</span> • ${formatTanggal(item.created_at)}
+                        </div>
+                        <p class="text-sm text-gray-700">${item.isi.substring(0, 100)}...</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading jurnal guru:', error);
+                alert('Gagal memuat data jurnal');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Excel processing functions
+        function processExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    let successCount = 0;
+                    let errorCount = 0;
+                    const errors = [];
+                    
+                    for (let i = 0; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        
+                        if (row.NIS && row.Nama && row.Kelas) {
+                            // Check if NIS already exists
+                            const { data: existingSiswa } = await supabaseClient
+                                .from('siswa')
+                                .select('nis')
+                                .eq('nis', row.NIS.toString())
+                                .single();
+                            
+                            if (existingSiswa) {
+                                errors.push(`Baris ${i + 2}: NIS ${row.NIS} sudah terdaftar`);
+                                errorCount++;
+                                continue;
+                            }
+                            
+                            const { error } = await supabaseClient
+                                .from('siswa')
+                                .insert([{
+                                    nis: row.NIS.toString(),
+                                    nama: row.Nama,
+                                    kelas: row.Kelas,
+                                    email: row.Email || null
+                                }]);
+                            
+                            if (error) {
+                                errors.push(`Baris ${i + 2}: ${error.message}`);
+                                errorCount++;
+                            } else {
+                                successCount++;
+                            }
+                        } else {
+                            errors.push(`Baris ${i + 2}: Data tidak lengkap (NIS, Nama, dan Kelas wajib diisi)`);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Show result
+                    let message = `Import selesai!\n\n`;
+                    message += `✅ Berhasil: ${successCount} siswa\n`;
+                    message += `❌ Gagal: ${errorCount} siswa\n\n`;
+                    
+                    if (errors.length > 0) {
+                        message += `Detail Error:\n${errors.slice(0, 5).join('\n')}`;
+                        if (errors.length > 5) {
+                            message += `\n... dan ${errors.length - 5} error lainnya`;
+                        }
+                    }
+                    
+                    alert(message);
+                    
+                    // Refresh table
+                    await loadSiswaContent();
+                    
+                    // Close modal
+                    document.getElementById('importExcelModal').classList.add('hidden');
+                    document.getElementById('fileInfo').classList.add('hidden');
+                    document.getElementById('processExcelBtn').disabled = true;
+                    
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    alert('Error processing file: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Fungsi untuk memproses file nilai
+        function processNilaiExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    let successCount = 0;
+                    let errorCount = 0;
+                    const errors = [];
+                    
+                    for (let i = 0; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        
+                        if (row.NIS && row['Jenis Nilai'] && row.Nilai !== undefined) {
+                            // Validasi jenis nilai
+                            const validJenis = ['uh1', 'uh2', 'uts', 'uas', 'tugas'];
+                            const jenisNilai = row['Jenis Nilai'].toLowerCase();
+                            
+                            if (!validJenis.includes(jenisNilai)) {
+                                errors.push(`Baris ${i + 2}: Jenis nilai tidak valid. Gunakan: uh1, uh2, uts, uas, tugas`);
+                                errorCount++;
+                                continue;
+                            }
+                            
+                            // Validasi nilai
+                            const nilai = parseInt(row.Nilai);
+                            if (isNaN(nilai) || nilai < 0 || nilai > 100) {
+                                errors.push(`Baris ${i + 2}: Nilai harus angka antara 0-100`);
+                                errorCount++;
+                                continue;
+                            }
+                            
+                            // Cari siswa berdasarkan NIS
+                            const { data: siswa, error: siswaError } = await supabaseClient
+                                .from('siswa')
+                                .select('id')
+                                .eq('nis', row.NIS.toString())
+                                .single();
+                            
+                            if (siswaError || !siswa) {
+                                errors.push(`Baris ${i + 2}: Siswa dengan NIS ${row.NIS} tidak ditemukan`);
+                                errorCount++;
+                                continue;
+                            }
+                            
+                            // Cek apakah sudah ada nilai untuk siswa ini dengan jenis yang sama
+                            const { data: existingNilai } = await supabaseClient
+                                .from('nilai')
+                                .select('id')
+                                .eq('siswa_id', siswa.id)
+                                .eq('jenis', jenisNilai)
+                                .single();
+                            
+                            if (existingNilai) {
+                                // Update nilai yang sudah ada
+                                const { error } = await supabaseClient
+                                    .from('nilai')
+                                    .update({ 
+                                        nilai: nilai,
+                                        status: 'Sudah Dinilai'
+                                    })
+                                    .eq('id', existingNilai.id);
+                                
+                                if (error) {
+                                    errors.push(`Baris ${i + 2}: ${error.message}`);
+                                    errorCount++;
+                                } else {
+                                    successCount++;
+                                }
+                            } else {
+                                // Insert nilai baru
+                                const { error } = await supabaseClient
+                                    .from('nilai')
+                                    .insert([{
+                                        siswa_id: siswa.id,
+                                        jenis: jenisNilai,
+                                        nilai: nilai,
+                                        status: 'Sudah Dinilai'
+                                    }]);
+                                
+                                if (error) {
+                                    errors.push(`Baris ${i + 2}: ${error.message}`);
+                                    errorCount++;
+                                } else {
+                                    successCount++;
+                                }
+                            }
+                        } else {
+                            errors.push(`Baris ${i + 2}: Data tidak lengkap (NIS, Jenis Nilai, dan Nilai wajib diisi)`);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Tampilkan hasil
+                    let message = `Import nilai selesai!\n\n`;
+                    message += `✅ Berhasil: ${successCount} nilai\n`;
+                    message += `❌ Gagal: ${errorCount} nilai\n\n`;
+                    
+                    if (errors.length > 0) {
+                        message += `Detail Error:\n${errors.slice(0, 5).join('\n')}`;
+                        if (errors.length > 5) {
+                            message += `\n... dan ${errors.length - 5} error lainnya`;
+                        }
+                    }
+                    
+                    alert(message);
+                    
+                    // Refresh tabel
+                    await loadNilaiGuru();
+                    
+                    // Tutup modal
+                    document.getElementById('uploadNilaiModal').classList.add('hidden');
+                    document.getElementById('nilaiFileInfo').classList.add('hidden');
+                    document.getElementById('processNilaiExcelBtn').disabled = true;
+                    
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    alert('Error processing file: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Helper functions
+        function formatTanggal(tanggal) {
+            return new Date(tanggal).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Event handlers
+        async function hapusSiswa(siswaId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus siswa ini?')) return;
+            
+            showLoading();
+            try {
+                const { error } = await supabaseClient
+                    .from('siswa')
+                    .delete()
+                    .eq('id', siswaId);
+                
+                if (error) throw error;
+                
+                await loadSiswaContent();
+                alert('Siswa berhasil dihapus');
+            } catch (error) {
+                console.error('Error deleting siswa:', error);
+                alert('Gagal menghapus siswa');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function editNilai(nilaiId) {
+            const nilai = prompt('Masukkan nilai baru (0-100):');
+            if (nilai === null || isNaN(nilai) || nilai < 0 || nilai > 100) return;
+            
+            showLoading();
+            try {
+                const { error } = await supabaseClient
+                    .from('nilai')
+                    .update({ 
+                        nilai: parseInt(nilai),
+                        status: 'Sudah Dinilai'
+                    })
+                    .eq('id', nilaiId);
+                
+                if (error) throw error;
+                
+                await loadNilaiGuru();
+                alert('Nilai berhasil diperbarui');
+            } catch (error) {
+                console.error('Error editing nilai:', error);
+                alert('Gagal memperbarui nilai');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function hapusJurnal(jurnalId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) return;
+            
+            showLoading();
+            try {
+                const { error } = await supabaseClient
+                    .from('jurnal')
+                    .delete()
+                    .eq('id', jurnalId);
+                
+                if (error) throw error;
+                
+                await loadJurnalGuru();
+                alert('Catatan berhasil dihapus');
+            } catch (error) {
+                console.error('Error deleting jurnal:', error);
+                alert('Gagal menghapus catatan');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            showPage('home');
+            updateUserInterface();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize
+            updateUserInterface();
+            loadHomeContent();
+            
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showPage(btn.dataset.page);
+                });
+            });
+
+            // Home page navigation cards
+            document.querySelectorAll('[data-navigate]').forEach(card => {
+                card.addEventListener('click', () => {
+                    showPage(card.dataset.navigate);
+                });
+            });
+
+            // Kelas cards
+            document.querySelectorAll('.kelas-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    currentKelas = card.dataset.kelas;
+                    currentMateri = null;
+                    document.getElementById('kelas-title').textContent = `Kelas ${currentKelas} - Fisika`;
+                    loadKelasContent();
+                });
+            });
+
+            // Back buttons
+            document.getElementById('back-to-kelas').addEventListener('click', () => {
+                currentMateri = null;
+                loadKelasContent();
+            });
+
+            document.getElementById('back-to-materi').addEventListener('click', () => {
+                currentMateri = null;
+                loadKelasContent();
+            });
+
+            // Login modal
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                document.getElementById('loginModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('loginModal').classList.add('hidden');
+            });
+
+            // Import Excel modal
+            document.getElementById('import-excel-btn').addEventListener('click', () => {
+                document.getElementById('importExcelModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeImportModal').addEventListener('click', () => {
+                document.getElementById('importExcelModal').classList.add('hidden');
+            });
+
+            // Upload nilai modal
+            document.getElementById('upload-nilai-btn').addEventListener('click', () => {
+                document.getElementById('uploadNilaiModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeUploadNilaiModal').addEventListener('click', () => {
+                document.getElementById('uploadNilaiModal').classList.add('hidden');
+            });
+
+            // File upload handling untuk siswa
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const excelFile = document.getElementById('excelFile');
+            const browseBtn = document.getElementById('browseBtn');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const processExcelBtn = document.getElementById('processExcelBtn');
+
+            browseBtn.addEventListener('click', () => {
+                excelFile.click();
+            });
+
+            fileUploadArea.addEventListener('click', () => {
+                excelFile.click();
+            });
+
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            excelFile.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleFileSelect(file) {
+                if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                    file.type === 'application/vnd.ms-excel') {
+                    fileName.textContent = file.name;
+                    fileInfo.classList.remove('hidden');
+                    processExcelBtn.disabled = false;
+                    processExcelBtn.onclick = () => processExcelFile(file);
+                } else {
+                    alert('Harap pilih file Excel (.xlsx atau .xls)');
+                }
+            }
+
+            // File upload handling untuk nilai
+            const nilaiFileUploadArea = document.getElementById('nilaiFileUploadArea');
+            const nilaiExcelFile = document.getElementById('nilaiExcelFile');
+            const nilaiBrowseBtn = document.getElementById('nilaiBrowseBtn');
+            const nilaiFileInfo = document.getElementById('nilaiFileInfo');
+            const nilaiFileName = document.getElementById('nilaiFileName');
+            const processNilaiExcelBtn = document.getElementById('processNilaiExcelBtn');
+
+            nilaiBrowseBtn.addEventListener('click', () => {
+                nilaiExcelFile.click();
+            });
+
+            nilaiFileUploadArea.addEventListener('click', () => {
+                nilaiExcelFile.click();
+            });
+
+            nilaiFileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                nilaiFileUploadArea.classList.add('dragover');
+            });
+
+            nilaiFileUploadArea.addEventListener('dragleave', () => {
+                nilaiFileUploadArea.classList.remove('dragover');
+            });
+
+            nilaiFileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                nilaiFileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleNilaiFileSelect(files[0]);
+                }
+            });
+
+            nilaiExcelFile.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleNilaiFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleNilaiFileSelect(file) {
+                if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                    file.type === 'application/vnd.ms-excel') {
+                    nilaiFileName.textContent = file.name;
+                    nilaiFileInfo.classList.remove('hidden');
+                    processNilaiExcelBtn.disabled = false;
+                    processNilaiExcelBtn.onclick = () => processNilaiExcelFile(file);
+                } else {
+                    alert('Harap pilih file Excel (.xlsx atau .xls)');
+                }
+            }
+
+            // Tambah siswa modal
+            document.getElementById('tambah-siswa-btn').addEventListener('click', () => {
+                document.getElementById('tambahSiswaModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeTambahSiswaModal').addEventListener('click', () => {
+                document.getElementById('tambahSiswaModal').classList.add('hidden');
+            });
+
+            // Tambah siswa form
+            document.getElementById('tambahSiswaForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const nis = document.getElementById('siswa-nis-baru').value;
+                const nama = document.getElementById('siswa-nama-baru').value;
+                const kelasTingkat = document.getElementById('siswa-kelas-tingkat-baru').value;
+                const kelasJurusan = document.getElementById('siswa-kelas-jurusan-baru').value;
+                const email = document.getElementById('siswa-email-baru').value;
+                
+                // Format kelas
+                const kelas = `${kelasTingkat}-${kelasJurusan}`;
+                
+                showLoading();
+                try {
+                    // Check if NIS already exists
+                    const { data: existingSiswa } = await supabaseClient
+                        .from('siswa')
+                        .select('nis')
+                        .eq('nis', nis)
+                        .single();
+                    
+                    if (existingSiswa) {
+                        alert('NIS sudah terdaftar!');
+                        return;
+                    }
+                    
+                    const { error } = await supabaseClient
+                        .from('siswa')
+                        .insert([{
+                            nis: nis,
+                            nama: nama,
+                            kelas: kelas,
+                            email: email || null
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    document.getElementById('tambahSiswaModal').classList.add('hidden');
+                    document.getElementById('tambahSiswaForm').reset();
+                    await loadSiswaContent();
+                    alert('Siswa berhasil ditambahkan!');
+                } catch (error) {
+                    console.error('Error adding siswa:', error);
+                    alert('Gagal menambah siswa: ' + error.message);
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            // Tambah materi button
+            document.getElementById('tambah-materi-btn').addEventListener('click', () => {
+                document.getElementById('uploadMateriModal').classList.remove('hidden');
+            });
+
+            // Upload materi modal
+            document.getElementById('closeUploadMateriModal').addEventListener('click', () => {
+                document.getElementById('uploadMateriModal').classList.add('hidden');
+            });
+
+            // Upload materi form
+            document.getElementById('uploadMateriForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const judul = document.getElementById('materi-judul-baru').value;
+                const deskripsi = document.getElementById('materi-deskripsi-baru').value;
+                const ppt = document.getElementById('materi-ppt-baru').value;
+                const video = document.getElementById('materi-video-baru').value;
+                const latihan = document.getElementById('materi-latihan-baru').value;
+                const modul = document.getElementById('materi-modul-baru').value;
+                
+                showLoading();
+                try {
+                    const { error } = await supabaseClient
+                        .from('materi')
+                        .insert([{
+                            kelas: currentKelas,
+                            judul: judul,
+                            deskripsi: deskripsi,
+                            ppt_link: ppt || null,
+                            video_link: video || null,
+                            latihan_link: latihan || null,
+                            modul_link: modul || null
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    document.getElementById('uploadMateriModal').classList.add('hidden');
+                    document.getElementById('uploadMateriForm').reset();
+                    await loadMateriList();
+                    alert('Materi berhasil ditambahkan!');
+                } catch (error) {
+                    console.error('Error uploading materi:', error);
+                    alert('Gagal menambah materi: ' + error.message);
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            // Login tabs
+            document.getElementById('guru-tab').addEventListener('click', () => {
+                document.getElementById('guru-tab').classList.add('bg-blue-600', 'text-white');
+                document.getElementById('guru-tab').classList.remove('text-gray-600');
+                document.getElementById('siswa-tab').classList.remove('bg-blue-600', 'text-white');
+                document.getElementById('siswa-tab').classList.add('text-gray-600');
+                document.getElementById('guru-form').classList.remove('hidden');
+                document.getElementById('siswa-form').classList.add('hidden');
+            });
+
+            document.getElementById('siswa-tab').addEventListener('click', () => {
+                document.getElementById('siswa-tab').classList.add('bg-blue-600', 'text-white');
+                document.getElementById('siswa-tab').classList.remove('text-gray-600');
+                document.getElementById('guru-tab').classList.remove('bg-blue-600', 'text-white');
+                document.getElementById('guru-tab').classList.add('text-gray-600');
+                document.getElementById('siswa-form').classList.remove('hidden');
+                document.getElementById('guru-form').classList.add('hidden');
+            });
+
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const isGuruTab = document.getElementById('guru-tab').classList.contains('bg-blue-600');
+                
+                if (isGuruTab) {
+                    const email = document.getElementById('guru-email').value;
+                    const password = document.getElementById('guru-password').value;
+                    
+                    if (email === 'teguh@example.com' && password === 'guru123') {
+                        currentUser = { role: 'guru', nama: 'Teguh Prasetyo', email: email };
+                        document.getElementById('loginModal').classList.add('hidden');
+                        updateUserInterface();
+                        alert('Login berhasil sebagai Guru!');
+                    } else {
+                        alert('Email atau password salah!');
+                    }
+                } else {
+                    const nis = document.getElementById('siswa-nis').value;
+                    const password = document.getElementById('siswa-password').value;
+                    
+                    try {
+                        const { data: siswa, error } = await supabaseClient
+                            .from('siswa')
+                            .select('*')
+                            .eq('nis', nis)
+                            .single();
+                        
+                        if (error || !siswa) {
+                            alert('NIS atau password salah!');
+                            return;
+                        }
+                        
+                        if (password === 'siswa123') {
+                            currentUser = { role: 'siswa', nama: siswa.nama, nis: nis };
+                            document.getElementById('loginModal').classList.add('hidden');
+                            updateUserInterface();
+                            alert(`Login berhasil sebagai ${siswa.nama}!`);
+                        } else {
+                            alert('Password salah!');
+                        }
+                    } catch (error) {
+                        console.error('Error login siswa:', error);
+                        alert('NIS atau password salah!');
+                    }
+                }
+            });
+
+            // Filter handlers
+            document.getElementById('filter-kelas-kehadiran').addEventListener('change', loadKehadiranGuru);
+            document.getElementById('filter-kelas-nilai').addEventListener('change', loadNilaiGuru);
+            document.getElementById('filter-jenis-nilai').addEventListener('change', loadNilaiGuru);
+            document.getElementById('filter-kelas-jurnal').addEventListener('change', loadJurnalGuru);
+
+            // Hadirkan semua button
+           
 document.getElementById('hadirkan-semua-btn').addEventListener('click', async () => {
     const today = new Date().toISOString().split('T')[0];
     const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
@@ -56,3 +2791,42 @@ document.getElementById('hadirkan-semua-btn').addEventListener('click', async ()
     } finally {
         hideLoading();
     }
+});
+            // Jurnal form
+            document.getElementById('jurnal-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const judul = document.getElementById('jurnal-judul').value;
+                const kelas = document.getElementById('jurnal-kelas').value;
+                const isi = document.getElementById('jurnal-isi').value;
+                
+                showLoading();
+                try {
+                    const { error } = await supabaseClient
+                        .from('jurnal')
+                        .insert([{
+                            judul: judul,
+                            kelas: kelas,
+                            isi: isi
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    document.getElementById('jurnal-form').reset();
+                    await loadJurnalGuru();
+                    alert('Catatan berhasil disimpan!');
+                } catch (error) {
+                    console.error('Error saving jurnal:', error);
+                    alert('Gagal menyimpan catatan: ' + error.message);
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            document.getElementById('reset-jurnal').addEventListener('click', () => {
+                document.getElementById('jurnal-form').reset();
+            });
+        });
+    </script>
+</body>
+</html>
