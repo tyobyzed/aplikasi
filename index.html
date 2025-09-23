@@ -1513,6 +1513,9 @@
                 const today = new Date().toISOString().split('T')[0];
                 const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
                 
+                // Set tanggal kehadiran
+                document.getElementById('tanggal-kehadiran').textContent = formatTanggal(today);
+                
                 // Get all students
                 let siswaQuery = supabaseClient.from('siswa').select('*');
                 if (filterKelas) {
@@ -1839,7 +1842,7 @@
                     if (error) throw error;
                 }
                 
-                await loadKehadiranContent();
+                await loadKehadiranGuru();
             } catch (error) {
                 console.error('Error updating kehadiran:', error);
                 alert('Gagal update kehadiran');
@@ -2724,8 +2727,8 @@
             document.getElementById('filter-jenis-nilai').addEventListener('change', loadNilaiGuru);
             document.getElementById('filter-kelas-jurnal').addEventListener('change', loadJurnalGuru);
 
-            // Hadirkan semua button
-            document.getElementById('hadirkan-semua-btn').addEventListener('click', async () => {
+            // Hadirkan semua button - PERBAIKAN DI SINI
+            document.getElementById('hadirkan-semua-btn').addEventListener('click', async function() {
                 const today = new Date().toISOString().split('T')[0];
                 const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
                 
@@ -2740,22 +2743,37 @@
                     const { data: siswa, error: siswaError } = await siswaQuery;
                     if (siswaError) throw siswaError;
                     
-                    // Mark all as present
-                    for (const s of siswa) {
-                        await supabaseClient
+                    // Prepare bulk insert data
+                    const kehadiranData = siswa.map(s => ({
+                        siswa_id: s.id,
+                        tanggal: today,
+                        status: 'hadir'
+                    }));
+                    
+                    // Use bulk delete and insert for better performance
+                    // First, delete any existing attendance records for today
+                    if (siswa.length > 0) {
+                        const { error: deleteError } = await supabaseClient
                             .from('kehadiran')
-                            .upsert([{
-                                siswa_id: s.id,
-                                tanggal: today,
-                                status: 'hadir'
-                            }], { onConflict: 'siswa_id,tanggal' });
+                            .delete()
+                            .in('siswa_id', siswa.map(s => s.id))
+                            .eq('tanggal', today);
+                            
+                        if (deleteError) throw deleteError;
+                        
+                        // Then insert new records
+                        const { error: insertError } = await supabaseClient
+                            .from('kehadiran')
+                            .insert(kehadiranData);
+                            
+                        if (insertError) throw insertError;
                     }
                     
-                    await loadKehadiranContent();
+                    await loadKehadiranGuru();
                     alert('Semua siswa telah dihadirkan!');
                 } catch (error) {
                     console.error('Error marking all present:', error);
-                    alert('Gagal menghadirkan semua siswa');
+                    alert('Gagal menghadirkan semua siswa: ' + error.message);
                 } finally {
                     hideLoading();
                 }
