@@ -1507,86 +1507,79 @@
             });
         }
 
-async function loadKehadiranGuru() {
-    showLoading();
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
-        
-        // Tampilkan tanggal kehadiran
-        const tanggalElement = document.getElementById('tanggal-kehadiran');
-        if (tanggalElement) {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            tanggalElement.textContent = new Date().toLocaleDateString('id-ID', options);
-        }
-        
-        // Get all students
-        let siswaQuery = supabaseClient.from('siswa').select('*');
-        if (filterKelas) {
-            siswaQuery = siswaQuery.eq('kelas', filterKelas);
-        }
-        
-        const { data: siswa, error: siswaError } = await siswaQuery;
-        if (siswaError) throw siswaError;
-        
-        // Get today's attendance
-        const { data: kehadiran, error: kehadiranError } = await supabaseClient
-            .from('kehadiran')
-            .select('*')
-            .eq('tanggal', today);
-        
-        if (kehadiranError) throw kehadiranError;
-        
-        // Merge attendance data
-        const siswaWithKehadiran = siswa.map(s => {
-            const kehadiranSiswa = kehadiran.find(k => k.siswa_id === s.id);
-            return {
-                ...s,
-                status: kehadiranSiswa ? kehadiranSiswa.status : 'alpha'
-            };
-        });
-        
-        const kehadiranList = document.getElementById('kehadiran-list');
-        kehadiranList.innerHTML = siswaWithKehadiran.map(siswa => `
-            <div class="flex items-center justify-between p-4 border rounded-lg">
-                <div class="flex items-center space-x-4">
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span class="font-semibold text-blue-600">${siswa.nama.charAt(0)}</span>
+        async function loadKehadiranGuru() {
+            showLoading();
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
+                
+                // Get all students
+                let siswaQuery = supabaseClient.from('siswa').select('*');
+                if (filterKelas) {
+                    siswaQuery = siswaQuery.eq('kelas', filterKelas);
+                }
+                
+                const { data: siswa, error: siswaError } = await siswaQuery;
+                if (siswaError) throw siswaError;
+                
+                // Get today's attendance
+                const { data: kehadiran, error: kehadiranError } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*')
+                    .eq('tanggal', today);
+                
+                if (kehadiranError) throw kehadiranError;
+                
+                // Merge attendance data
+                const siswaWithKehadiran = siswa.map(s => {
+                    const kehadiranSiswa = kehadiran.find(k => k.siswa_id === s.id);
+                    return {
+                        ...s,
+                        status: kehadiranSiswa ? kehadiranSiswa.status : 'alpha'
+                    };
+                });
+                
+                const kehadiranList = document.getElementById('kehadiran-list');
+                kehadiranList.innerHTML = siswaWithKehadiran.map(siswa => `
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="font-semibold text-blue-600">${siswa.nama.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <div class="font-semibold">${siswa.nama}</div>
+                                <div class="text-sm text-gray-600">NIS: ${siswa.nis} | <span class="kelas-badge ${getKelasColor(siswa.kelas)}">${siswa.kelas}</span></div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'hadir' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'hadir')">
+                                ✅ Hadir
+                            </button>
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'sakit' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'sakit')">
+                                🤒 Sakit
+                            </button>
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'izin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'izin')">
+                                📝 Izin
+                            </button>
+                            <button class="px-3 py-1 rounded text-sm ${siswa.status === 'alpha' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'}" 
+                                    onclick="updateKehadiran(${siswa.id}, 'alpha')">
+                                ❌ Alpha
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <div class="font-semibold">${siswa.nama}</div>
-                        <div class="text-sm text-gray-600">NIS: ${siswa.nis} | <span class="kelas-badge ${getKelasColor(siswa.kelas)}">${siswa.kelas}</span></div>
-                    </div>
-                </div>
-                <div class="flex space-x-2">
-                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'hadir' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}" 
-                            onclick="updateKehadiran(${siswa.id}, 'hadir')">
-                        ✅ Hadir
-                    </button>
-                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'sakit' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}" 
-                            onclick="updateKehadiran(${siswa.id}, 'sakit')">
-                        🤒 Sakit
-                    </button>
-                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'izin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}" 
-                            onclick="updateKehadiran(${siswa.id}, 'izin')">
-                        📝 Izin
-                    </button>
-                    <button class="px-3 py-1 rounded text-sm ${siswa.status === 'alpha' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'}" 
-                            onclick="updateKehadiran(${siswa.id}, 'alpha')">
-                        ❌ Alpha
-                    </button>
-                </div>
-            </div>
-        `).join('');
-        
-        updateRingkasanKehadiran(siswaWithKehadiran);
-    } catch (error) {
-        console.error('Error loading kehadiran guru:', error);
-        alert('Gagal memuat data kehadiran');
-    } finally {
-        hideLoading();
-    }
-}
+                `).join('');
+                
+                updateRingkasanKehadiran(siswaWithKehadiran);
+            } catch (error) {
+                console.error('Error loading kehadiran guru:', error);
+                alert('Gagal memuat data kehadiran');
+            } finally {
+                hideLoading();
+            }
+        }
 
         async function loadKehadiranSiswa() {
             showLoading();
@@ -2732,66 +2725,42 @@ async function loadKehadiranGuru() {
             document.getElementById('filter-kelas-jurnal').addEventListener('change', loadJurnalGuru);
 
             // Hadirkan semua button
-           
-document.getElementById('hadirkan-semua-btn').addEventListener('click', async () => {
-    const today = new Date().toISOString().split('T')[0];
-    const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
-    
-    // Tampilkan tanggal kehadiran
-    const tanggalElement = document.getElementById('tanggal-kehadiran');
-    if (tanggalElement) {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        tanggalElement.textContent = new Date().toLocaleDateString('id-ID', options);
-    }
-    
-    showLoading();
-    try {
-        // Get all students
-        let siswaQuery = supabaseClient.from('siswa').select('*');
-        if (filterKelas) {
-            siswaQuery = siswaQuery.eq('kelas', filterKelas);
-        }
-        
-        const { data: siswa, error: siswaError } = await siswaQuery;
-        if (siswaError) throw siswaError;
-        
-        // Mark all as present
-        for (const s of siswa) {
-            // Check if attendance record exists
-            const { data: existingKehadiran } = await supabaseClient
-                .from('kehadiran')
-                .select('*')
-                .eq('siswa_id', s.id)
-                .eq('tanggal', today)
-                .single();
-            
-            if (existingKehadiran) {
-                // Update existing record
-                await supabaseClient
-                    .from('kehadiran')
-                    .update({ status: 'hadir' })
-                    .eq('id', existingKehadiran.id);
-            } else {
-                // Insert new record
-                await supabaseClient
-                    .from('kehadiran')
-                    .insert([{
-                        siswa_id: s.id,
-                        tanggal: today,
-                        status: 'hadir'
-                    }]);
-            }
-        }
-        
-        await loadKehadiranContent();
-        alert('Semua siswa telah dihadirkan!');
-    } catch (error) {
-        console.error('Error marking all present:', error);
-        alert('Gagal menghadirkan semua siswa: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-});
+            document.getElementById('hadirkan-semua-btn').addEventListener('click', async () => {
+                const today = new Date().toISOString().split('T')[0];
+                const filterKelas = document.getElementById('filter-kelas-kehadiran').value;
+                
+                showLoading();
+                try {
+                    // Get all students
+                    let siswaQuery = supabaseClient.from('siswa').select('*');
+                    if (filterKelas) {
+                        siswaQuery = siswaQuery.eq('kelas', filterKelas);
+                    }
+                    
+                    const { data: siswa, error: siswaError } = await siswaQuery;
+                    if (siswaError) throw siswaError;
+                    
+                    // Mark all as present
+                    for (const s of siswa) {
+                        await supabaseClient
+                            .from('kehadiran')
+                            .upsert([{
+                                siswa_id: s.id,
+                                tanggal: today,
+                                status: 'hadir'
+                            }], { onConflict: 'siswa_id,tanggal' });
+                    }
+                    
+                    await loadKehadiranContent();
+                    alert('Semua siswa telah dihadirkan!');
+                } catch (error) {
+                    console.error('Error marking all present:', error);
+                    alert('Gagal menghadirkan semua siswa');
+                } finally {
+                    hideLoading();
+                }
+            });
+
             // Jurnal form
             document.getElementById('jurnal-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
