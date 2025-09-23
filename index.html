@@ -17,14 +17,16 @@
         .file-upload-area {
             border: 2px dashed #cbd5e0;
             transition: all 0.3s ease;
+            background: #f8fafc;
+            border-radius: 12px;
         }
         .file-upload-area:hover {
             border-color: #667eea;
-            background-color: #f7fafc;
+            background-color: #f0f4ff;
         }
         .file-upload-area.dragover {
             border-color: #667eea;
-            background-color: #ebf4ff;
+            background-color: #e0e7ff;
         }
         .kelas-badge {
             display: inline-block;
@@ -64,6 +66,12 @@
         .stat-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(5px);
+        }
+        .upload-preview {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         }
     </style>
 </head>
@@ -181,11 +189,6 @@
                         </div>
                         <div class="text-gray-700 font-medium">Kehadiran Rata-rata</div>
                         <div class="text-xs text-gray-500 mt-1" id="stat-kehadiran-detail">Memuat...</div>
-                    </div>
-                </div>
-            </div>
-
-           
                     </div>
                 </div>
             </div>
@@ -488,7 +491,7 @@
                         <option value="tugas">Tugas Proyek</option>
                     </select>
                     <button id="upload-nilai-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">
-                        📤 Upload Nilai
+                        📤 Import Nilai
                     </button>
                 </div>
             </div>
@@ -609,8 +612,8 @@
     </main>
 
     <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
             <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
             <div class="mb-6">
                 <div class="flex bg-gray-100 rounded-lg p-1">
@@ -655,8 +658,8 @@
     </div>
 
     <!-- Import Excel Modal -->
-    <div id="importExcelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+    <div id="importExcelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl">
             <h3 class="text-2xl font-bold mb-6">Import Data Siswa dari Excel</h3>
             
             <div class="mb-6">
@@ -699,9 +702,91 @@
         </div>
     </div>
 
+    <!-- Upload Nilai Modal -->
+    <div id="uploadNilaiModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold">Import Data Nilai</h3>
+                <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                    Excel Format
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
+                    <h4 class="font-semibold text-lg mb-3 text-gray-800">Format File Excel:</h4>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                            <div class="text-2xl mb-2">🆔</div>
+                            <div class="font-semibold text-sm">NIS</div>
+                            <div class="text-xs text-gray-600">Nomor Induk Siswa</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                            <div class="text-2xl mb-2">📝</div>
+                            <div class="font-semibold text-sm">Jenis Nilai</div>
+                            <div class="text-xs text-gray-600">uh1, uh2, uts, uas, tugas</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                            <div class="text-2xl mb-2">📊</div>
+                            <div class="font-semibold text-sm">Nilai</div>
+                            <div class="text-xs text-gray-600">Angka 0-100</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <span class="text-yellow-600 mr-2">⚠️</span>
+                        <div class="text-sm text-yellow-800">
+                            <p class="font-semibold mb-1">Catatan Penting:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Pastikan NIS siswa sudah terdaftar di sistem</li>
+                                <li>Jenis nilai harus salah satu: uh1, uh2, uts, uas, tugas</li>
+                                <li>Nilai harus berupa angka antara 0-100</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-upload-area rounded-lg p-12 text-center mb-6" id="nilaiFileUploadArea">
+                <div class="upload-preview rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <span class="text-4xl">📊</span>
+                </div>
+                <p class="text-lg font-medium text-gray-700 mb-2">Upload File Excel Nilai</p>
+                <p class="text-gray-500 mb-6">Drag & drop file atau klik untuk browse</p>
+                <input type="file" id="nilaiExcelFile" accept=".xlsx,.xls" class="hidden">
+                <button type="button" id="nilaiBrowseBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                    Pilih File Excel
+                </button>
+            </div>
+
+            <div id="nilaiFileInfo" class="hidden mb-6">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <span class="text-green-600 mr-3">✅</span>
+                        <div>
+                            <p class="font-semibold text-green-800">File siap diimport:</p>
+                            <p class="text-green-600" id="nilaiFileName"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="button" id="processNilaiExcelBtn" class="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg hover:from-green-700 hover:to-green-800 font-semibold disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed" disabled>
+                    🚀 Proses Import Nilai
+                </button>
+                <button type="button" id="closeUploadNilaiModal" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 font-semibold">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Tambah Siswa Modal -->
-    <div id="tambahSiswaModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <div id="tambahSiswaModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
             <h3 class="text-2xl font-bold mb-6">Tambah Siswa Baru</h3>
             <form id="tambahSiswaForm">
                 <div class="mb-4">
@@ -742,8 +827,8 @@
     </div>
 
     <!-- Upload Materi Modal -->
-    <div id="uploadMateriModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+    <div id="uploadMateriModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl">
             <h3 class="text-2xl font-bold mb-6">Upload Materi Pembelajaran</h3>
             <form id="uploadMateriForm">
                 <div class="mb-4">
@@ -898,10 +983,7 @@
                     loadTotalKelas(),
                     loadTotalMateri(),
                     loadTotalSiswa(),
-                    loadAttendancePercentage(),
-                    loadRecentActivity(),
-                    loadKelasDistribution(),
-                    loadTodayStatus()
+                    loadAttendancePercentage()
                 ]);
             } catch (error) {
                 console.error('Error loading home content:', error);
@@ -1021,179 +1103,6 @@
                 document.getElementById('stat-kehadiran-rata').textContent = '0%';
                 document.getElementById('stat-kehadiran-detail').textContent = 'Error';
             }
-        }
-
-        async function loadRecentActivity() {
-            try {
-                // Get recent activities from different tables
-                const [materi, jurnal, kehadiran] = await Promise.all([
-                    supabaseClient.from('materi').select('created_at, judul').order('created_at', { ascending: false }).limit(3),
-                    supabaseClient.from('jurnal').select('created_at, judul').order('created_at', { ascending: false }).limit(3),
-                    supabaseClient.from('kehadiran').select('created_at, status').order('created_at', { ascending: false }).limit(3)
-                ]);
-
-                const activities = [];
-                
-                // Process materi
-                materi.data.forEach(item => {
-                    activities.push({
-                        type: 'materi',
-                        title: item.judul,
-                        date: item.created_at,
-                        icon: '📚'
-                    });
-                });
-
-                // Process jurnal
-                jurnal.data.forEach(item => {
-                    activities.push({
-                        type: 'jurnal',
-                        title: item.judul,
-                        date: item.created_at,
-                        icon: '📝'
-                    });
-                });
-
-                // Process kehadiran
-                kehadiran.data.forEach(item => {
-                    activities.push({
-                        type: 'kehadiran',
-                        title: `Kehadiran ${item.status}`,
-                        date: item.created_at,
-                        icon: '✅'
-                    });
-                });
-
-                // Sort by date and take latest 5
-                activities.sort((a, b) => new Date(b.date) - new Date(a.date));
-                const latestActivities = activities.slice(0, 5);
-
-                const activityContainer = document.getElementById('recent-activity');
-                activityContainer.innerHTML = latestActivities.map(activity => `
-                    <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
-                        <span class="text-lg">${activity.icon}</span>
-                        <div class="flex-1">
-                            <div class="text-sm font-medium text-gray-800">${activity.title}</div>
-                            <div class="text-xs text-gray-500">${formatTimeAgo(activity.date)}</div>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading recent activity:', error);
-                document.getElementById('recent-activity').innerHTML = '<p class="text-gray-500 text-sm">Gagal memuat aktivitas</p>';
-            }
-        }
-
-        async function loadKelasDistribution() {
-            try {
-                const { data: siswa, error } = await supabaseClient
-                    .from('siswa')
-                    .select('kelas');
-                
-                if (error) throw error;
-                
-                // Count students per class
-                const kelasCount = {};
-                siswa.forEach(item => {
-                    if (item.kelas) {
-                        kelasCount[item.kelas] = (kelasCount[item.kelas] || 0) + 1;
-                    }
-                });
-
-                const distributionContainer = document.getElementById('kelas-distribution');
-                distributionContainer.innerHTML = Object.entries(kelasCount)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 5)
-                    .map(([kelas, count]) => `
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <span class="kelas-badge ${getKelasColor(kelas)}">${kelas}</span>
-                            </div>
-                            <span class="font-semibold">${count} siswa</span>
-                        </div>
-                    `).join('');
-            } catch (error) {
-                console.error('Error loading kelas distribution:', error);
-                document.getElementById('kelas-distribution').innerHTML = '<p class="text-gray-500 text-sm">Gagal memuat distribusi</p>';
-            }
-        }
-
-        async function loadTodayStatus() {
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                
-                // Get today's attendance
-                const { data: kehadiran, error } = await supabaseClient
-                    .from('kehadiran')
-                    .select('status')
-                    .eq('tanggal', today);
-                
-                if (error) throw error;
-                
-                const statusCount = {
-                    hadir: 0,
-                    sakit: 0,
-                    izin: 0,
-                    alpha: 0
-                };
-
-                kehadiran.forEach(record => {
-                    if (statusCount.hasOwnProperty(record.status)) {
-                        statusCount[record.status]++;
-                    }
-                });
-
-                const statusContainer = document.getElementById('today-status');
-                statusContainer.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-green-600">✅</span>
-                            <span class="text-sm">Hadir</span>
-                        </div>
-                        <span class="font-semibold text-green-600">${statusCount.hadir}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-yellow-600">🤒</span>
-                            <span class="text-sm">Sakit</span>
-                        </div>
-                        <span class="font-semibold text-yellow-600">${statusCount.sakit}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-blue-600">📝</span>
-                            <span class="text-sm">Izin</span>
-                        </div>
-                        <span class="font-semibold text-blue-600">${statusCount.izin}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-red-600">❌</span>
-                            <span class="text-sm">Alpha</span>
-                        </div>
-                        <span class="font-semibold text-red-600">${statusCount.alpha}</span>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error loading today status:', error);
-                document.getElementById('today-status').innerHTML = '<p class="text-gray-500 text-sm">Gagal memuat status</p>';
-            }
-        }
-
-        function formatTimeAgo(date) {
-            const now = new Date();
-            const past = new Date(date);
-            const diffMs = now - past;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
-
-            if (diffMins < 1) return 'Baru saja';
-            if (diffMins < 60) return `${diffMins} menit lalu`;
-            if (diffHours < 24) return `${diffHours} jam lalu`;
-            if (diffDays < 7) return `${diffDays} hari lalu`;
-            
-            return formatTanggal(date);
         }
 
         async function loadKelasContent() {
@@ -2248,6 +2157,133 @@
             reader.readAsArrayBuffer(file);
         }
 
+        // Fungsi untuk memproses file nilai
+        function processNilaiExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    let successCount = 0;
+                    let errorCount = 0;
+                    const errors = [];
+                    
+                    for (let i = 0; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        
+                        if (row.NIS && row['Jenis Nilai'] && row.Nilai !== undefined) {
+                            // Validasi jenis nilai
+                            const validJenis = ['uh1', 'uh2', 'uts', 'uas', 'tugas'];
+                            const jenisNilai = row['Jenis Nilai'].toLowerCase();
+                            
+                            if (!validJenis.includes(jenisNilai)) {
+                                errors.push(`Baris ${i + 2}: Jenis nilai tidak valid. Gunakan: uh1, uh2, uts, uas, tugas`);
+                                errorCount++;
+                                continue;
+                            }
+                            
+                            // Validasi nilai
+                            const nilai = parseInt(row.Nilai);
+                            if (isNaN(nilai) || nilai < 0 || nilai > 100) {
+                                errors.push(`Baris ${i + 2}: Nilai harus angka antara 0-100`);
+                                errorCount++;
+                                continue;
+                            }
+                            
+                            // Cari siswa berdasarkan NIS
+                            const { data: siswa, error: siswaError } = await supabaseClient
+                                .from('siswa')
+                                .select('id')
+                                .eq('nis', row.NIS.toString())
+                                .single();
+                            
+                            if (siswaError || !siswa) {
+                                errors.push(`Baris ${i + 2}: Siswa dengan NIS ${row.NIS} tidak ditemukan`);
+                                errorCount++;
+                                continue;
+                            }
+                            
+                            // Cek apakah sudah ada nilai untuk siswa ini dengan jenis yang sama
+                            const { data: existingNilai } = await supabaseClient
+                                .from('nilai')
+                                .select('id')
+                                .eq('siswa_id', siswa.id)
+                                .eq('jenis', jenisNilai)
+                                .single();
+                            
+                            if (existingNilai) {
+                                // Update nilai yang sudah ada
+                                const { error } = await supabaseClient
+                                    .from('nilai')
+                                    .update({ 
+                                        nilai: nilai,
+                                        status: 'Sudah Dinilai'
+                                    })
+                                    .eq('id', existingNilai.id);
+                                
+                                if (error) {
+                                    errors.push(`Baris ${i + 2}: ${error.message}`);
+                                    errorCount++;
+                                } else {
+                                    successCount++;
+                                }
+                            } else {
+                                // Insert nilai baru
+                                const { error } = await supabaseClient
+                                    .from('nilai')
+                                    .insert([{
+                                        siswa_id: siswa.id,
+                                        jenis: jenisNilai,
+                                        nilai: nilai,
+                                        status: 'Sudah Dinilai'
+                                    }]);
+                                
+                                if (error) {
+                                    errors.push(`Baris ${i + 2}: ${error.message}`);
+                                    errorCount++;
+                                } else {
+                                    successCount++;
+                                }
+                            }
+                        } else {
+                            errors.push(`Baris ${i + 2}: Data tidak lengkap (NIS, Jenis Nilai, dan Nilai wajib diisi)`);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Tampilkan hasil
+                    let message = `Import nilai selesai!\n\n`;
+                    message += `✅ Berhasil: ${successCount} nilai\n`;
+                    message += `❌ Gagal: ${errorCount} nilai\n\n`;
+                    
+                    if (errors.length > 0) {
+                        message += `Detail Error:\n${errors.slice(0, 5).join('\n')}`;
+                        if (errors.length > 5) {
+                            message += `\n... dan ${errors.length - 5} error lainnya`;
+                        }
+                    }
+                    
+                    alert(message);
+                    
+                    // Refresh tabel
+                    await loadNilaiGuru();
+                    
+                    // Tutup modal
+                    document.getElementById('uploadNilaiModal').classList.add('hidden');
+                    document.getElementById('nilaiFileInfo').classList.add('hidden');
+                    document.getElementById('processNilaiExcelBtn').disabled = true;
+                    
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    alert('Error processing file: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
         // Helper functions
         function formatTanggal(tanggal) {
             return new Date(tanggal).toLocaleDateString('id-ID', {
@@ -2393,7 +2429,16 @@
                 document.getElementById('importExcelModal').classList.add('hidden');
             });
 
-            // File upload handling
+            // Upload nilai modal
+            document.getElementById('upload-nilai-btn').addEventListener('click', () => {
+                document.getElementById('uploadNilaiModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeUploadNilaiModal').addEventListener('click', () => {
+                document.getElementById('uploadNilaiModal').classList.add('hidden');
+            });
+
+            // File upload handling untuk siswa
             const fileUploadArea = document.getElementById('fileUploadArea');
             const excelFile = document.getElementById('excelFile');
             const browseBtn = document.getElementById('browseBtn');
@@ -2441,6 +2486,59 @@
                     fileInfo.classList.remove('hidden');
                     processExcelBtn.disabled = false;
                     processExcelBtn.onclick = () => processExcelFile(file);
+                } else {
+                    alert('Harap pilih file Excel (.xlsx atau .xls)');
+                }
+            }
+
+            // File upload handling untuk nilai
+            const nilaiFileUploadArea = document.getElementById('nilaiFileUploadArea');
+            const nilaiExcelFile = document.getElementById('nilaiExcelFile');
+            const nilaiBrowseBtn = document.getElementById('nilaiBrowseBtn');
+            const nilaiFileInfo = document.getElementById('nilaiFileInfo');
+            const nilaiFileName = document.getElementById('nilaiFileName');
+            const processNilaiExcelBtn = document.getElementById('processNilaiExcelBtn');
+
+            nilaiBrowseBtn.addEventListener('click', () => {
+                nilaiExcelFile.click();
+            });
+
+            nilaiFileUploadArea.addEventListener('click', () => {
+                nilaiExcelFile.click();
+            });
+
+            nilaiFileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                nilaiFileUploadArea.classList.add('dragover');
+            });
+
+            nilaiFileUploadArea.addEventListener('dragleave', () => {
+                nilaiFileUploadArea.classList.remove('dragover');
+            });
+
+            nilaiFileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                nilaiFileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleNilaiFileSelect(files[0]);
+                }
+            });
+
+            nilaiExcelFile.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleNilaiFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleNilaiFileSelect(file) {
+                if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                    file.type === 'application/vnd.ms-excel') {
+                    nilaiFileName.textContent = file.name;
+                    nilaiFileInfo.classList.remove('hidden');
+                    processNilaiExcelBtn.disabled = false;
+                    processNilaiExcelBtn.onclick = () => processNilaiExcelFile(file);
                 } else {
                     alert('Harap pilih file Excel (.xlsx atau .xls)');
                 }
@@ -2663,11 +2761,6 @@
                 } finally {
                     hideLoading();
                 }
-            });
-
-            // Upload nilai button
-            document.getElementById('upload-nilai-btn').addEventListener('click', () => {
-                alert('Fitur upload nilai akan membuka dialog untuk upload file Excel/CSV atau input manual.');
             });
 
             // Jurnal form
