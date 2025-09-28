@@ -98,14 +98,9 @@
                         <p class="text-sm opacity-90">Pembelajaran Fisika Interaktif</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div id="userInfo" class="text-white text-sm hidden">
-                        <span id="userRole"></span> - <span id="userName"></span>
-                    </div>
-                    <button id="loginBtn" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                        Login
-                    </button>
-                </div>
+                <button id="loginBtn" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                    Login
+                </button>
             </div>
         </div>
     </header>
@@ -335,7 +330,12 @@
             </div>
         </div>
 
-        <!-- Login Modal -->
+        <!-- Other pages remain the same -->
+        <!-- ... (kelas, siswa, nilai, jurnal pages) ... -->
+
+    </main>
+
+    <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 modal-backdrop">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
             <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
@@ -350,11 +350,11 @@
                 <div id="guru-form">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" id="guru-email" class="w-full border rounded-lg px-4 py-2" placeholder="teguh@example.com" value="teguh@example.com">
+                        <input type="email" id="guru-email" class="w-full border rounded-lg px-4 py-2" placeholder="teguh@example.com">
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input type="password" id="guru-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password" value="guru123">
+                        <input type="password" id="guru-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password">
                     </div>
                 </div>
                 
@@ -365,7 +365,7 @@
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input type="password" id="siswa-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password" value="siswa123">
+                        <input type="password" id="siswa-password" class="w-full border rounded-lg px-4 py-2" placeholder="Password">
                     </div>
                 </div>
                 
@@ -442,25 +442,6 @@
         let studentDatabase = [];
         let tokenInterval = null;
 
-        // AUTHENTICATION FUNCTIONS
-        function saveAuthState(user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-        }
-
-        function loadAuthState() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                return true;
-            }
-            return false;
-        }
-
-        function clearAuthState() {
-            localStorage.removeItem('currentUser');
-            currentUser = null;
-        }
-
         // Utility functions
         function showLoading() {
             document.getElementById('loading-indicator').classList.remove('hidden');
@@ -517,19 +498,6 @@
 
         function updateUserInterface() {
             const isGuru = currentUser && currentUser.role === 'guru';
-            
-            // Update user info display
-            const userInfo = document.getElementById('userInfo');
-            const userRole = document.getElementById('userRole');
-            const userName = document.getElementById('userName');
-            
-            if (currentUser) {
-                userInfo.classList.remove('hidden');
-                userRole.textContent = currentUser.role === 'guru' ? 'Guru' : 'Siswa';
-                userName.textContent = currentUser.nama;
-            } else {
-                userInfo.classList.add('hidden');
-            }
             
             // Show/hide guru-only buttons
             document.querySelectorAll('#hadirkan-semua-btn, #generate-token-btn').forEach(btn => {
@@ -943,7 +911,7 @@
             document.getElementById('success-modal').classList.add('hidden');
         });
 
-        // Helper functions
+        // Helper functions tetap sama
         function formatTanggal(tanggal) {
             return new Date(tanggal).toLocaleDateString('id-ID', {
                 year: 'numeric',
@@ -965,7 +933,7 @@
         }
 
         function logout() {
-            clearAuthState();
+            currentUser = null;
             // Hentikan timer saat logout
             if (tokenInterval) {
                 clearInterval(tokenInterval);
@@ -977,9 +945,6 @@
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Check for saved auth state on page load
-            const isLoggedIn = loadAuthState();
-            
             // Initialize
             updateUserInterface();
             loadHomeContent();
@@ -1037,13 +1002,7 @@
                     const password = document.getElementById('guru-password').value;
                     
                     if (email === 'teguh@example.com' && password === 'guru123') {
-                        currentUser = { 
-                            role: 'guru', 
-                            nama: 'Teguh Prasetyo', 
-                            email: email,
-                            loginTime: new Date().toISOString()
-                        };
-                        saveAuthState(currentUser);
+                        currentUser = { role: 'guru', nama: 'Teguh Prasetyo', email: email };
                         document.getElementById('loginModal').classList.add('hidden');
                         updateUserInterface();
                         alert('Login berhasil sebagai Guru!');
@@ -1067,13 +1026,7 @@
                         }
                         
                         if (password === 'siswa123') {
-                            currentUser = { 
-                                role: 'siswa', 
-                                nama: siswa.nama, 
-                                nis: nis,
-                                loginTime: new Date().toISOString()
-                            };
-                            saveAuthState(currentUser);
+                            currentUser = { role: 'siswa', nama: siswa.nama, nis: nis };
                             document.getElementById('loginModal').classList.add('hidden');
                             updateUserInterface();
                             alert(`Login berhasil sebagai ${siswa.nama}!`);
@@ -1169,135 +1122,7 @@
 
         // Fungsi placeholder untuk halaman lain (agar tidak error)
         async function loadHomeContent() {
-            if (!currentUser) return;
-            
-            showLoading();
-            try {
-                // Load all statistics
-                await Promise.all([
-                    loadTotalKelas(),
-                    loadTotalMateri(),
-                    loadTotalSiswa(),
-                    loadAttendancePercentage()
-                ]);
-            } catch (error) {
-                console.error('Error loading home content:', error);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadTotalKelas() {
-            try {
-                // Get unique classes from students
-                const { data: siswa, error } = await supabaseClient
-                    .from('siswa')
-                    .select('kelas');
-                
-                if (error) throw error;
-                
-                // Get unique classes
-                const kelasSet = new Set();
-                siswa.forEach(item => {
-                    if (item.kelas) kelasSet.add(item.kelas);
-                });
-                
-                const totalKelas = kelasSet.size;
-                document.getElementById('stat-total-kelas').textContent = totalKelas;
-                document.getElementById('stat-kelas-detail').textContent = `${totalKelas} kelas aktif`;
-            } catch (error) {
-                console.error('Error loading total kelas:', error);
-                document.getElementById('stat-total-kelas').textContent = '0';
-                document.getElementById('stat-kelas-detail').textContent = 'Error';
-            }
-        }
-
-        async function loadTotalMateri() {
-            try {
-                // Menggunakan metode count untuk mendapatkan jumlah materi
-                const { count, error } = await supabaseClient
-                    .from('materi')
-                    .select('*', { count: 'exact', head: true });
-                
-                if (error) throw error;
-                
-                document.getElementById('stat-total-materi').textContent = count || 0;
-                document.getElementById('stat-materi-detail').textContent = `${count || 0} materi tersedia`;
-            } catch (error) {
-                console.error('Error loading total materi:', error);
-                document.getElementById('stat-total-materi').textContent = '0';
-                document.getElementById('stat-materi-detail').textContent = 'Error';
-            }
-        }
-
-        async function loadTotalSiswa() {
-            try {
-                // Menggunakan metode count untuk mendapatkan jumlah siswa
-                const { count, error } = await supabaseClient
-                    .from('siswa')
-                    .select('*', { count: 'exact', head: true });
-                
-                if (error) throw error;
-                
-                document.getElementById('stat-total-siswa').textContent = count || 0;
-                document.getElementById('stat-siswa-detail').textContent = `${count || 0} siswa terdaftar`;
-            } catch (error) {
-                console.error('Error loading total siswa:', error);
-                document.getElementById('stat-total-siswa').textContent = '0';
-                document.getElementById('stat-siswa-detail').textContent = 'Error';
-            }
-        }
-        
-        async function loadAttendancePercentage() {
-            try {
-                // Get all attendance records
-                const { data: kehadiran, error } = await supabaseClient
-                    .from('kehadiran')
-                    .select('*');
-                
-                if (error) throw error;
-                
-                if (kehadiran.length === 0) {
-                    document.getElementById('stat-kehadiran-rata').textContent = '0%';
-                    document.getElementById('stat-kehadiran-detail').textContent = 'Belum ada data';
-                    return;
-                }
-                
-                // Group by student
-                const studentAttendance = {};
-                kehadiran.forEach(record => {
-                    if (!studentAttendance[record.siswa_id]) {
-                        studentAttendance[record.siswa_id] = {
-                            total: 0,
-                            hadir: 0
-                        };
-                    }
-                    studentAttendance[record.siswa_id].total++;
-                    if (record.status === 'hadir') {
-                        studentAttendance[record.siswa_id].hadir++;
-                    }
-                });
-                
-                // Calculate average percentage
-                let totalPercentage = 0;
-                let studentCount = 0;
-                
-                for (const studentId in studentAttendance) {
-                    const attendance = studentAttendance[studentId];
-                    if (attendance.total > 0) {
-                        totalPercentage += (attendance.hadir / attendance.total) * 100;
-                        studentCount++;
-                    }
-                }
-                
-                const averagePercentage = studentCount > 0 ? Math.round(totalPercentage / studentCount) : 0;
-                document.getElementById('stat-kehadiran-rata').textContent = `${averagePercentage}%`;
-                document.getElementById('stat-kehadiran-detail').textContent = `Rata-rata ${studentCount} siswa`;
-            } catch (error) {
-                console.error('Error calculating attendance percentage:', error);
-                document.getElementById('stat-kehadiran-rata').textContent = '0%';
-                document.getElementById('stat-kehadiran-detail').textContent = 'Error';
-            }
+            // Implementasi loadHomeContent di sini jika diperlukan
         }
 
         async function loadKelasContent() {
